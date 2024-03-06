@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+. "$ZETTEL_WORKDIR/common"
+
+ref_help() {
+    command_name=${0##*/}
+    echo "
+    $command_name
+    Usage: $cli_name $command_name [command]
+    Commands:
+    add      **add** new reference to current zettel
+    rm       **remove** reference from current zettel
+    *         Help
+    "
+    exit 1
+}
+
+case "$1" in
+    add)
+        echo adding reference
+        ;;
+    rm)
+        echo removing reference
+        ;;
+    *)
+        ref_help
+        ;;
+esac

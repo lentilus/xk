@@ -1,0 +1,3 @@
+#!/bin/bash
+
+nvim --listen /tmp/zettelkasten.pipe

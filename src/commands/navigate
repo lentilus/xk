@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+. "$ZETTEL_WORKDIR/common"
+
+nav_help() {
+    command_name=${0##*/}
+    echo "
+    $command_name
+    Usage: $cli_name $command_name [command]
+    Commands:
+    add      **add** new reference to current zettel
+    rm       **remove** reference from current zettel
+    *         Help
+    "
+    exit 1
+}
+
+fzf_navigate() {
+    selected=$2
+    zettel_session
+    if [[ -z $selected ]]; then
+        selected=$(cd $ZETTEL_DATA && ls | fzf-tmux )
+        if [[ -z selected ]]; then
+            tmux display-message "no zettel selected"
+            exit 1
+        fi
+    fi
+    filepath="$ZETTEL_DATA/$selected/$ZETTEL_FILENAME"
+    nvim --server $NVIM_PIPE --remote $filepath
+}
+
+ref_navigate() {
+    zettel_session
+    current_zettel=$(viewing)
+    tmux display-message "current zettel is $current_zettel"
+    references="$current_zettel/${REFERENCE_FILENAME}"
+    selected=$( cat $references | fzf-tmux )
+
+    if [[ -z selected ]]; then
+        tmux display-message "no zettel selected"
+    fi
+    filepath="$ZETTEL_DATA/$selected/$ZETTEL_FILENAME"
+    if ! [[ -f $filepath ]]; then
+        tmux display-message "reference does not exist"
+    fi
+    nvim --server $NVIM_PIPE --remote $filepath
+}
+
+
+
+case "$1" in
+    fzf)
+        fzf_navigate $2
+        ;;
+    ref)
+        ref_navigate
+        ;;
+    bref)
+        bref_navigate
+        ;;
+    *)
+        ref_help
+        ;;
+esac

@@ -1,0 +1,24 @@
+#!/bin/bash
+source .env
+
+read -p "title: " title
+echo $title
+
+sleep 1
+
+if [ -z $title ]; then
+    echo "invalid name"
+    exit 0
+fi
+
+if [ -d $ZETTEL_KASTEN_HOME/$title ]; then
+    echo "zettel already exists"
+    exit 0
+fi
+
+cp -r $ZETTEL_KASTEN_HOME/template $ZETTEL_KASTEN_HOME/$title
+
+ls $ZETTEL_KASTEN_HOME
+
+$HOME/git/tex_zettel/scripts/open_zettel $title
+

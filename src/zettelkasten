@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -e
+export ZETTEL_WORKDIR=$(cd $(dirname $0) && pwd)
+export $(cat "$ZETTEL_WORKDIR/config" | xargs)
+. "$ZETTEL_WORKDIR/common"
+
+cli_help() {
+    cli_name=${0##*/}
+    echo "
+    $cli_name
+    ZETTELKASTEN CLI
+    Version: $(cat $ZETTEL_WORKDIR/VERSION)
+    Usage: $cli_name [command]
+    Commands:
+    test      --testing--
+    ref       change references
+    goto      navigate zettel
+    new       create new zettel
+    status    get status
+    *         Help
+    "
+    exit 1
+}
+
+
+case "$1" in
+    ref)
+        "$ZETTEL_WORKDIR/commands/reference" $2 $3
+        ;;
+    goto)
+        # ref
+        # bref
+        # zettel
+        "$ZETTEL_WORKDIR/commands/navigate" $2 $3
+        ;;
+    new)
+        "$ZETTEL_WORKDIR/commands/newzettel"
+        ;;
+    status)
+        echo "currently viewing $(viewing)"
+        ;;
+    *)
+        cli_help
+        ;;
+esac

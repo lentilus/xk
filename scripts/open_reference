@@ -1,0 +1,20 @@
+#!/bin/bash
+source $HOME/git/tex_zettel/.env
+
+listening="/tmp/zettelkasten.pipe"
+
+# last=$(cat /tmp/zettel_last_opened)
+
+# for some reason it outputs to sterr wtfffffff
+nvim --server $listening --remote-expr "expand('%')" 2&>1 > /tmp/zettelkasten_open
+current_zettel=$(</tmp/zettelkasten_open)
+last=$(realpath $(dirname $current_zettel))
+selected=$(cat "$last/references" | fzf-tmux -h )
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+$HOME/git/tex_zettel/scripts/open_zettel $selected
+
+
