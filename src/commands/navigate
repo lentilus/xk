@@ -9,11 +9,19 @@ nav_help() {
     $command_name
     Usage: $cli_name $command_name [command]
     Commands:
-    add      **add** new reference to current zettel
-    rm       **remove** reference from current zettel
+    fzf       fuzzy find any zettel
+    ref       select from references of current_zettel
+    bref      select from back-references
+              (zettel that reference the current)
     *         Help
     "
     exit 1
+}
+
+reference_file() {
+    current_zettel=$1
+    references="$ZETTEL_DATA/$current_zettel/${REFERENCE_FILENAME}"
+    echo $references
 }
 
 fzf_navigate() {
@@ -26,28 +34,46 @@ fzf_navigate() {
             exit 1
         fi
     fi
-    filepath="$ZETTEL_DATA/$selected/$ZETTEL_FILENAME"
-    nvim --server $NVIM_PIPE --remote $filepath
+    open_zettel $selected
 }
 
 ref_navigate() {
     zettel_session
-    current_zettel=$(viewing)
-    tmux display-message "current zettel is $current_zettel"
-    references="$current_zettel/${REFERENCE_FILENAME}"
+    references=$(reference_file $(viewing))
     selected=$( cat $references | fzf-tmux )
-
-    if [[ -z selected ]]; then
-        tmux display-message "no zettel selected"
-    fi
-    filepath="$ZETTEL_DATA/$selected/$ZETTEL_FILENAME"
-    if ! [[ -f $filepath ]]; then
-        tmux display-message "reference does not exist"
-    fi
-    nvim --server $NVIM_PIPE --remote $filepath
+    open_zettel $selected
 }
 
+brefs() {
+    target=$1
+    # go through all zettels
+    for zettel in $(zettel_list)
+    do
+        # check that the reference_file exists
+        if ! [[ -f $(reference_file $zettel ) ]]; then
+            continue
+        fi
+        # check that it is not empty
+        references=$(cat $(reference_file $zettel ))
+        if [[ -z $references ]]; then
+            continue
+        fi
+        # go through the references
+        for ref in $references
+        do
+            # check if current zettel is referenced
+            if [[ $ref = $target ]]; then
+                echo $zettel
+            fi
+        done
+    done
+}
 
+bref_navigate() {
+    zettel_session
+    selected=$(brefs $(viewing) | fzf-tmux)
+    open_zettel $selected
+}
 
 case "$1" in
     fzf)

@@ -2,7 +2,7 @@ HUI="SCHUWUI"
 NVIM_PIPE=/tmp/zettelkastenasdfasdfpoij.pipe
 SESSION_NAME="--ZETTELKASTEN--"
 NVIM_CMD="nvim"
-ZETTEL_DATA="/home/lentilus/git/tex_zettel/kasten/"
+ZETTEL_DATA="/home/lentilus/git/tex_zettel/kasten"
 ZETTEL_FILENAME="zettel.tex"
 REFERENCE_FILENAME="references"
 

@@ -17,6 +17,28 @@ zettel_session() {
     tmux switch-client -t $SESSION_NAME
 }
 
+open_zettel() {
+    zettel=$(basename $1)
+
+    if [[ -z zettel ]]; then
+        tmux display-message "nothing to do"
+    fi
+
+    filepath="$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME"
+    if ! [[ -f $filepath ]]; then
+        tmux display-message "$zettel does not exist."
+    fi
+    nvim --server $NVIM_PIPE --remote $filepath
+}
+
+zettel_list() {
+    list=$(find $ZETTEL_DATA -type d -mindepth 1 -maxdepth 1)
+    for zettel in $list
+    do
+        printf %"s\n" "$(basename $zettel)"
+    done
+}
+
 viewing() {
     # for some reason it outputs to sterr wtf?
     nvim --server $NVIM_PIPE \
@@ -29,6 +51,6 @@ viewing() {
     then
         exit 1
     else
-        echo $(cd $ZETTEL_DATA; realpath $(dirname $open))
+        echo $(cd $ZETTEL_DATA; basename $(dirname $open))
     fi
 }
