@@ -3,6 +3,8 @@
 set -e
 export ZETTEL_WORKDIR=$(cd $(dirname $0) && pwd)
 export $(cat "$ZETTEL_WORKDIR/config" | xargs)
+
+export NVIM_PIPE="/tmp/$NVIM_PIPE"
 . "$ZETTEL_WORKDIR/common"
 
 cli_help() {
@@ -23,19 +25,17 @@ cli_help() {
     exit 1
 }
 
+CMD=$ZETTEL_WORKDIR/commands
 
 case "$1" in
     ref)
-        "$ZETTEL_WORKDIR/commands/reference" $2 $3
+        $CMD/reference $@ > $LOG_FILE
         ;;
-    goto)
-        # ref
-        # bref
-        # zettel
-        "$ZETTEL_WORKDIR/commands/navigate" $2 $3
+    go)
+        $CMD/navigate $@ > $LOG_FILE
         ;;
     new)
-        "$ZETTEL_WORKDIR/commands/newzettel"
+        $CMD/commands/newzettel > $LOG_FILE
         ;;
     status)
         echo "currently viewing $(viewing)"

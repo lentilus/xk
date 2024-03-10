@@ -25,12 +25,12 @@ reference_file() {
 }
 
 fzf_navigate() {
-    selected=$2
+    selected=$1
     zettel_session
     if [[ -z $selected ]]; then
-        selected=$(cd $ZETTEL_DATA && ls | fzf-tmux )
+        selected=$( zettel_list | fzf-tmux )
         if [[ -z selected ]]; then
-            tmux display-message "no zettel selected"
+            info "no zettel selected"
             exit 1
         fi
     fi
@@ -40,7 +40,7 @@ fzf_navigate() {
 ref_navigate() {
     zettel_session
     references=$(reference_file $(viewing))
-    selected=$( cat $references | fzf-tmux )
+    selected=$( cat $references | fzf-tmux ) || selected=""
     open_zettel $selected
 }
 
@@ -71,8 +71,8 @@ brefs() {
 
 bref_navigate() {
     zettel_session
-    selected=$(brefs $(viewing) | fzf-tmux)
-    open_zettel $selected
+    selected=$(brefs $(viewing) | fzf-tmux) || selected=""
+    open_zettel "$selected"
 }
 
 case "$1" in

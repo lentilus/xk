@@ -16,12 +16,35 @@ ref_help() {
     exit 1
 }
 
+ref_add() {
+    zettel_session
+    selected=$(zettel_list | fzf-tmux) || exit
+
+    # if reference is already in references there is nothing todo
+    if ! [[ -z $(cat $(reference_file $(viewing)) | grep -x $selected) ]]; then
+        exit
+    fi
+
+    echo "$selected" >> $(reference_file $(viewing))
+}
+
+ref_rm() {
+    zettel_session
+    ref_file=$(reference_file $(viewing))
+    echo $ref_file
+    selected=$(cat $ref_file | fzf-tmux) || exit
+	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" && echo confirmed
+	log "removing $selected from references"
+    cat $ref_file | grep -v -x "$selected" > /tmp/zettelkasten_ref_cache
+	mv /tmp/zettelkasten_ref_cache $ref_file
+}
+
 case "$1" in
     add)
-        echo adding reference
+        ref_add
         ;;
     rm)
-        echo removing reference
+        ref_rm
         ;;
     *)
         ref_help

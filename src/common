@@ -1,34 +1,55 @@
 #!/usr/bin/env bash
-cli_log() {
-  script_name=${0##*/}
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  echo "== $script_name $timestamp $1"
+
+log() {
+	script_name=${0##*/}
+	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+	echo "== $script_name $timestamp $1"
+}
+
+info() {
+	tmux display-message "$1"
 }
 
 zettel_session() {
     if ! tmux has-session -t="$SESSION_NAME" 2> /dev/null; then
+		log "creating new session"
+
+		log "removing old pipe"
+		rm -rf $NVIM_PIPE
+
         cmd="$NVIM_CMD --listen $NVIM_PIPE"
-        tmux display-message "using command $cmd"
-        tmux new-session \
-            -c $ZETTEL_DATA \
-            -ds $SESSION_NAME $cmd
+		log "$cmd"
+
+		log $(tmux new-session -c $ZETTEL_DATA -d -s "$SESSION_NAME" "$cmd")
     fi
 
+	log "tmux switch client"
     tmux switch-client -t $SESSION_NAME
 }
 
+reference_file() {
+    current_zettel=$1
+    references="$ZETTEL_DATA/$current_zettel/${REFERENCE_FILENAME}"
+    echo $references
+}
+
 open_zettel() {
-    zettel=$(basename $1)
-
-    if [[ -z zettel ]]; then
-        tmux display-message "nothing to do"
+	log "open zettel $1"
+    zettel=$(basename "$1")
+    if [[ -z $zettel ]]; then
+		log "nothing to do, exiting"
+        info "nothing to do"
+        exit
     fi
-
     filepath="$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME"
+	log "filepath: $filepath"
     if ! [[ -f $filepath ]]; then
-        tmux display-message "$zettel does not exist."
+		log "does not exist"
+        info "$zettel does not exist."
+        exit
     fi
-    nvim --server $NVIM_PIPE --remote $filepath
+	log "nvim remote"
+    $NVIM_CMD --server $NVIM_PIPE --remote $filepath
 }
 
 zettel_list() {
