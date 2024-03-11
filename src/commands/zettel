@@ -46,7 +46,7 @@ new_zettel() {
     
     if [ -z $NAME ]; then
         zettel_session
-        NAME=$(user_input "name: " "new_zettel") || exit
+        NAME=$(user_input "name: " "") || exit
     fi
     
     case $NAME in
