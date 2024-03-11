@@ -3,6 +3,7 @@
 set -e
 . "$ZETTEL_WORKDIR/common"
 
+
 zettel_help() {
     command_name=${0##*/}
     echo "
@@ -14,6 +15,14 @@ zettel_help() {
     *         Help
     "
     exit 1
+}
+
+expand_template() {
+    echo "$(
+        export NAME=$1
+        export PREAMBLE=$PREAMBLE_FILE
+        envsubst < $ZETTEL_TEMPLATE
+    )"
 }
 
 new_zettel() {
@@ -55,7 +64,7 @@ new_zettel() {
     log "trying to create new zettel $NAME"
 
     mkdir $ZETTEL_DATA/$NAME
-    echo "welcome to $NAME" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME"
+    echo "$(expand_template $NAME)"> "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME"
     touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME"
     open_zettel $NAME
 }

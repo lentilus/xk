@@ -32,11 +32,19 @@ init_kasten() {
     if [ -d "$ZETTEL_DATA" ]; then
         info "directory $ZETTEL_DATA already exists."
         echo "directory $ZETTEL_DATA already exists."
+
+        info "relinking preamble"
+        rm -rf "$ZETTEL_DATA/preamble.link"
+        ln -s "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link"
         exit
     fi
 
     info "creating directory $ZETTEL_DATA"
     mkdir -p "$ZETTEL_DATA"
+
+    info "symlinking preamble"
+    ln -s "$ZETTEL_DATA/preamble.link" "$ZETTEL_PREAMBLE"
+     
 }
 
 CMD=$ZETTEL_WORKDIR/commands

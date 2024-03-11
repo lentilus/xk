@@ -2,6 +2,9 @@
 
 export NVIM_PIPE=/tmp/$NVIM_PIPE
 export SESSION_NAME="--XeTtelkasten--"
+export PREAMBLE_LINK="../preamble.link"
+export ZETTEL_TEMPLATE="$ZETTEL_WORKDIR/../template.tex"
+export ZETTEL_PREAMBLE="$ZETTEL_WORKDIR/../preamble.tex"
 
 # structure
 export ZETTEL_FILENAME=zettel.tex
