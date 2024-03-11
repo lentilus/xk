@@ -4,8 +4,8 @@ set -e
 export ZETTEL_WORKDIR=$(cd $(dirname $0) && pwd)
 export $(cat "$ZETTEL_WORKDIR/config" | xargs)
 
-export NVIM_PIPE="/tmp/$NVIM_PIPE"
-. "$ZETTEL_WORKDIR/common"
+. $ZETTEL_WORKDIR/globals
+. $ZETTEL_WORKDIR/common
 
 cli_help() {
     cli_name=${0##*/}
@@ -25,35 +25,42 @@ cli_help() {
     exit 1
 }
 
+
+init_kasten() {
+    if [ -d "$ZETTEL_DATA" ]; then
+        info "directory $ZETTEL_DATA already exists."
+        echo "directory $ZETTEL_DATA already exists."
+        exit
+    fi
+
+    info "creating directory $ZETTEL_DATA"
+    mkdir -p "$ZETTEL_DATA"
+}
+
 CMD=$ZETTEL_WORKDIR/commands
 
 case "$1" in
-    tmux)
-        export MODE="tmux"; shift
+    init)
+        init_kasten && exit
         ;;
-    *)
-        export MODE="cli"
-        ;;
-esac
-
-case "$1" in
     ref)
+        check_kasten
         shift
         $CMD/ref $@
         ;;
     go)
+        check_kasten
         shift
         $CMD/go $@
         ;;
     zettel)
+        check_kasten
         shift
         $CMD/zettel $@
         ;;
     status)
+        check_kasten
         echo "currently viewing $(viewing)"
-        ;;
-    input)
-        user_input "hello whats up: " "" 
         ;;
     *)
         cli_help

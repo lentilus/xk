@@ -46,15 +46,22 @@ new_zettel() {
             ;;
     esac
 
+    if [ -d $ZETTEL_DATA/$NAME ]; then
+        info "name already in use - provide a unique name"
+        log "zettel with same name exists, aborting"
+        exit
+    fi
+
     log "trying to create new zettel $NAME"
 
-    mkdir $ZETTEL_DATA/$NAME \
-        && echo "welcome to $NAME" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME" \
-        && touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME" \
-        && open_zettel $NAME
+    mkdir $ZETTEL_DATA/$NAME
+    echo "welcome to $NAME" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME"
+    touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME"
+    open_zettel $NAME
 }
 
 del_zettel() {
+    log "delete zettel not implemented"
     echo delete zettel
 }
 

@@ -3,6 +3,8 @@
 set -e
 . "$ZETTEL_WORKDIR/common"
 
+check_kasten
+
 nav_help() {
     command_name=${0##*/}
     echo "

@@ -7,7 +7,16 @@ log() {
 }
 
 info() {
-	tmux display-message "$1"
+	tmux display-message -d 500 "$1" 
+}
+
+check_kasten() {
+    if ! [[ -d $ZETTEL_DATA ]]; then
+        echo "no zettelkasten - please run init"
+        info "no zettelkasten - please run init"
+        exit
+    fi
+    log "kasten directory: check passed"
 }
 
 zettel_session() {
@@ -21,6 +30,7 @@ zettel_session() {
 		log "$cmd"
 
 		log $(tmux new-session -c $ZETTEL_DATA -d -s "$SESSION_NAME" "$cmd")
+        sleep 0.2
     fi
 
 	log "tmux switch client"

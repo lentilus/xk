@@ -1,0 +1,19 @@
+#!/bin/bash
+
+export NVIM_PIPE=/tmp/$NVIM_PIPE
+export SESSION_NAME="--XeTtelkasten--"
+
+# structure
+export ZETTEL_FILENAME=zettel.tex
+export REFERENCE_FILENAME=references
+
+# directory stucture of a zettelkasten
+# with the zettels foo and bar
+#
+# $ZETTEL_DATA
+# ├── bar
+# │   ├── $REFERENCE_FILENAME
+# │   └── $ZETTEL_FILENAME
+# └── foo
+#     ├── $REFERENCE_FILENAME
+#     └── $ZETTEL_FILENAME
