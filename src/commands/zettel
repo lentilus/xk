@@ -39,10 +39,17 @@ new_zettel() {
         zettel_session
         NAME=$(user_input "name: " "new_zettel") || exit
     fi
+    
+    case $NAME in
+        *\ * )
+            info "name may not contain spaces"; exit
+            ;;
+    esac
+
     log "trying to create new zettel $NAME"
 
     mkdir $ZETTEL_DATA/$NAME \
-        && echo "new zettel" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME" \
+        && echo "welcome to $NAME" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME" \
         && touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME" \
         && open_zettel $NAME
 }
