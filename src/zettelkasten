@@ -28,14 +28,25 @@ cli_help() {
 CMD=$ZETTEL_WORKDIR/commands
 
 case "$1" in
+    tmux)
+        export MODE="tmux"; shift
+        ;;
+    *)
+        export MODE="cli"
+        ;;
+esac
+
+case "$1" in
     ref)
-        $CMD/reference $@ > $LOG_FILE
+        shift
+        $CMD/ref $@ > $LOG_FILE
         ;;
     go)
-        $CMD/navigate $@ > $LOG_FILE
+        shift
+        $CMD/go $@ > $LOG_FILE
         ;;
     new)
-        $CMD/commands/newzettel > $LOG_FILE
+        $CMD/newzettel > $LOG_FILE
         ;;
     status)
         echo "currently viewing $(viewing)"

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -e
+. "$ZETTEL_WORKDIR/common"
+
+nav_help() {
+    command_name=${0##*/}
+    echo "
+    $command_name
+    Usage: $cli_name $command_name [command]
+    Commands:
+    fzf       fuzzy find any zettel
+    ref       select from references of current_zettel
+    bref      select from back-references
+              (zettel that reference the current)
+    *         Help
+    "
+    exit 1
+}
+refs() {
+    cat $(ref_file $1)
+}
+
+brefs() {
+    target=$1
+    for zettel in $(zettel_list)
+    do
+        [ -f $(ref_file $zettel ) ] || continue
+        references=$(refs $zettel )
+        [ -z $references ] && continue
+        for ref in $references
+        do
+            # check if current zettel is referenced
+            [ $ref = $target ] && echo $zettel
+        done
+    done
+}
+
+ref_file() {
+    current_zettel=$1
+    references="$ZETTEL_DATA/$current_zettel/${REFERENCE_FILENAME}"
+    echo $references
+}
+
+nav_fzf() {
+    zettel_session
+    selected=$( zettel_list | fzf-tmux ) || selected=""
+    open_zettel $selected
+}
+
+nav_ref() {
+    zettel_session
+    selected=$( refs $(viewing) | fzf-tmux ) || selected=""
+    open_zettel $selected
+}
+
+
+nav_bref() {
+    zettel_session
+    selected=$( brefs $(viewing) | fzf-tmux ) || selected=""
+    open_zettel $selected
+}
+
+case "$1" in
+    direct)
+        open_zettel $2
+        ;;
+    fzf)
+        nav_fzf
+        ;;
+    ref)
+        nav_ref
+        ;;
+    bref)
+        nav_bref
+        ;;
+    *)
+        nav_help
+        ;;
+esac
