@@ -3,7 +3,7 @@
 log() {
 	script_name=${0##*/}
 	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-	echo "== $script_name $timestamp $@"
+	>&2 echo "== $script_name $timestamp $@" 
 }
 
 info() {
@@ -66,10 +66,26 @@ viewing() {
 
     open=$(</tmp/zettelkasten_open)
 
-    if [[ -z $open ]]
+    if [[ -z $open ]];
     then
         exit 1
     else
-        echo $(cd $ZETTEL_DATA; basename $(dirname $open))
+        echo $(cd $zettel_data; basename $(dirname $open))
+    fi
+}
+
+user_input() {
+    log "getting user input"
+    nvim --server $NVIM_PIPE \
+        --remote-expr "input('$1', '$2', 'file')" 2> /tmp/zettelkasten_input >/dev/null
+
+    open=$(</tmp/zettelkasten_input)
+    log "result is $open"
+
+    if [[ -z $open ]];
+    then
+        exit 1
+    else
+        echo $open
     fi
 }

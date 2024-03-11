@@ -18,7 +18,7 @@ cli_help() {
     test      --testing--
     ref       change references
     goto      navigate zettel
-    new       create new zettel
+    zettel    manage zettel (remove/add)
     status    get status
     *         Help
     "
@@ -39,17 +39,21 @@ esac
 case "$1" in
     ref)
         shift
-        $CMD/ref $@ > $LOG_FILE
+        $CMD/ref $@
         ;;
     go)
         shift
-        $CMD/go $@ > $LOG_FILE
+        $CMD/go $@
         ;;
-    new)
-        $CMD/newzettel > $LOG_FILE
+    zettel)
+        shift
+        $CMD/zettel $@
         ;;
     status)
         echo "currently viewing $(viewing)"
+        ;;
+    input)
+        user_input "hello whats up: " "" 
         ;;
     *)
         cli_help

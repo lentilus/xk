@@ -1,0 +1,66 @@
+#!/bin/bash
+
+set -e
+. "$ZETTEL_WORKDIR/common"
+
+zettel_help() {
+    command_name=${0##*/}
+    echo "
+    $command_name
+    Usage: $cli_name $command_name [command]
+    Commands:
+    new       create a new zettel
+    del       delete an existing zettel
+    *         Help
+    "
+    exit 1
+}
+
+new_zettel() {
+    OPTSTRING=":n:"
+
+    while getopts ${OPTSTRING} opt; do
+      case ${opt} in
+        n)
+          NAME=$OPTARG
+          ;;
+        :)
+          echo "Option -${OPTARG} requires an argument."
+          exit 1
+          ;;
+        ?)
+          echo "Invalid option: -${OPTARG}."
+          exit 1
+          ;;
+      esac
+    done
+    
+    if [ -z $NAME ]; then
+        zettel_session
+        NAME=$(user_input "name: " "new_zettel") || exit
+    fi
+    log "trying to create new zettel $NAME"
+
+    mkdir $ZETTEL_DATA/$NAME \
+        && echo "new zettel" > "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME" \
+        && touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME" \
+        && open_zettel $NAME
+}
+
+del_zettel() {
+    echo delete zettel
+}
+
+case "$1" in
+    new)
+        shift
+        new_zettel $@
+        ;;
+    del)
+        shift
+        del_zettel $@
+        ;;
+    *)
+        zettel_help
+        ;;
+esac
