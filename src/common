@@ -3,7 +3,7 @@
 log() {
 	script_name=${0##*/}
 	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-	>&2 echo "== $script_name $timestamp $@" 
+	>&2 echo "== $script_name $timestamp" "$@" 
 }
 
 info() {
@@ -24,23 +24,23 @@ zettel_session() {
 		log "creating new session"
 
 		log "removing old pipe"
-		rm -rf $NVIM_PIPE
+		rm -rf "$NVIM_PIPE"
 
         cmd="$NVIM_CMD --listen $NVIM_PIPE"
 		log "$cmd"
 
-		log $(tmux new-session -c $ZETTEL_DATA -d -s "$SESSION_NAME" "$cmd")
+		log "$(tmux new-session -c "$ZETTEL_DATA" -d -s "$SESSION_NAME" "$cmd")"
         sleep 0.2
     fi
 
 	log "tmux switch client"
-    tmux switch-client -t $SESSION_NAME
+    tmux switch-client -t "$SESSION_NAME"
 }
 
 reference_file() {
     current_zettel=$1
     references="$ZETTEL_DATA/$current_zettel/${REFERENCE_FILENAME}"
-    echo $references
+    echo "$references"
 }
 
 open_zettel() {
@@ -59,19 +59,19 @@ open_zettel() {
         exit
     fi
 	log "nvim remote"
-    $NVIM_CMD --server $NVIM_PIPE --remote $filepath
+    "$NVIM_CMD" --server "$NVIM_PIPE" --remote "$filepath"
 }
 
 zettel_list() {
-    list=$(find $ZETTEL_DATA -mindepth 1 -maxdepth 1 -type d)
+    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d)"
     for zettel in $list
     do
-        printf %"s\n" "$(basename $zettel)"
+        printf %"s\n" "$(basename "$zettel")"
     done
 }
 
 viewing() {
-    nvim --server $NVIM_PIPE \
+    nvim --server "$NVIM_PIPE" \
         --remote-expr "expand('%')" &> /tmp/zettelkasten_open
 
     open=$(</tmp/zettelkasten_open)
@@ -80,13 +80,13 @@ viewing() {
     then
         exit 1
     else
-        echo $(cd $zettel_data; basename $(dirname $open))
+        echo "$(cd "$ZETTEL_DATA"; basename "$(dirname "$open")")" || exit
     fi
 }
 
 user_input() {
     log "getting user input"
-    nvim --server $NVIM_PIPE \
+    nvim --server "$NVIM_PIPE" \
         --remote-expr "input('$1', '$2', 'file')" &> /tmp/zettelkasten_input
 
     open=$(</tmp/zettelkasten_input)
@@ -96,6 +96,6 @@ user_input() {
     then
         exit 1
     else
-        echo $open
+        echo "$open"
     fi
 }
