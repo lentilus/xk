@@ -10,6 +10,20 @@ info() {
 	tmux display-message -d 500 "$1" 
 }
 
+viewing() {
+    nvim --server "$NVIM_PIPE" \
+        --remote-expr "expand('%')" &> /tmp/zettelkasten_open
+
+    open=$(</tmp/zettelkasten_open)
+
+    if [[ -z $open ]];
+    then
+        exit 1
+    else
+        echo "$(cd "$ZETTEL_DATA"; basename "$(dirname "$open")")" || exit
+    fi
+}
+
 check_kasten() {
     if ! [[ -d $ZETTEL_DATA ]]; then
         echo "no zettelkasten - please run init"
@@ -44,6 +58,10 @@ reference_file() {
 }
 
 open_zettel() {
+
+    log "before open hook..."
+    "$ZETTEL_WORKDIR/../custom_hooks/before_open" "$(viewing)" || log "before open hool failed"
+
 	log "open zettel $1"
     zettel=$(basename "$1")
     if [[ -z $zettel ]]; then
@@ -60,6 +78,9 @@ open_zettel() {
     fi
 	log "nvim remote"
     "$NVIM_CMD" --server "$NVIM_PIPE" --remote "$filepath"
+
+    log "after open hook"
+    "$ZETTEL_WORKDIR/../custom_hooks/after_open" "$(viewing)" || log "after open hool failed"
 }
 
 zettel_list() {
@@ -70,19 +91,6 @@ zettel_list() {
     done
 }
 
-viewing() {
-    nvim --server "$NVIM_PIPE" \
-        --remote-expr "expand('%')" &> /tmp/zettelkasten_open
-
-    open=$(</tmp/zettelkasten_open)
-
-    if [[ -z $open ]];
-    then
-        exit 1
-    else
-        echo "$(cd "$ZETTEL_DATA"; basename "$(dirname "$open")")" || exit
-    fi
-}
 
 user_input() {
     log "getting user input"

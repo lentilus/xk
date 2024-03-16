@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    exit 0
+fi
+
+filename=$1
+
+pattern='..|select(.type?)|select(.type=="con" and .app_id != null)|select(.app_id|test("zathura"))|select(.name|test("/zettel.pdf"))|.pid'
+pid="$(swaymsg -t get_tree | jq -r "$pattern")"
+
+if [ -z "$pid" ]; then
+    exit 0
+fi
+
+kill "$pid"
