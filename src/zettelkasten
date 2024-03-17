@@ -27,15 +27,27 @@ cli_help() {
     exit 1
 }
 
+expand_main() {
+    echo "$(
+        export PREAMBLE=$PREAMBLE_FILE
+        envsubst < $MAIN_TEMPLATE
+    )"
+}
 
 init_kasten() {
     if [ -d "$ZETTEL_DATA" ]; then
         info "directory $ZETTEL_DATA already exists."
         echo "directory $ZETTEL_DATA already exists."
 
-        info "relinking preamble"
-        rm -rf "$ZETTEL_DATA/preamble.link"
-        ln -s  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link"
+        info "updating preamble"
+        rm -f "${ZETTEL_DATA:?}/${PREAMBLE_FILE:?}"
+        cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
+
+        info "updating mainfile"
+        log "removing old glossary file"
+        rm -f "${ZETTEL_DATA:?}/glossary.tex"
+        log "creating new glossary file"
+        echo "$(expand_main)" > "$ZETTEL_DATA/glossary.tex" 
         exit
     fi
 
@@ -43,8 +55,10 @@ init_kasten() {
     mkdir -p "$ZETTEL_DATA"
 
     info "symlinking preamble"
-    ln -s "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link" 
+    cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
      
+    info "creating glossary"
+    echo "$(expand_main)" > "$ZETTEL_DATA/glossary.tex" 
 }
 
 CMD=$ZETTEL_WORKDIR/commands

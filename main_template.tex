@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage[subpreambles=false]{standalone}
+\usepackage{import}
+
+\title{Xettelkasten Glossary}
+\author{Lentilus}
+\date{\today}
+\input{$PREAMBLE}    
+
+\renewenvironment{zettel}[1]{
+    \section*{#1}
+    \label{#1}
+}{
+    \vspace{15pt}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{mdframed}
+   This file is the compiled pdf of Lentilus' Zettelkasten.
+
+   This pdf will get autcompiled using LuaLatex on Gitlab.com.
+
+   For an up-to-date version please check (url).
+
+   Each zettel (section) contains an atomic idea/concept/definition.
+
+   %...
+\end{mdframed}
+\newpage
+
+%%% TODO
+% - use lualatex to import all zettel here
+% - skip failed zettel!
+
+% ...
+% \import{myzettel/}{zettel}
+% ...
+
+\end{document}
