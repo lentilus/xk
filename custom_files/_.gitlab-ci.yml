@@ -1,0 +1,42 @@
+stages:
+  - build
+  - release
+
+build-job:
+  stage: build
+  image: tianon/latex
+  script:
+    - mkdir build
+    # - pdflatex -output-directory=build main.tex 
+    - latexmk -pdf -pdflatex="lualatex -file-line-error %O %S" -outdir=build glossary.tex
+    - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
+  artifacts:
+    paths:
+      - build/glossary.pdf
+    reports:
+      # export the environment statement so we can access it in the release stage
+      dotenv: CI_JOB_ID.env
+release-job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - job: build-job
+      artifacts: true
+  script:
+    - echo "release application..."
+    - echo "Application successfully released."
+  release:
+    name: 'Release Executables $CI_COMMIT_SHORT_SHA'
+    description: 'Created using the release-cli'
+    # tag_name is a memandatory field and can not be an empty string
+    tag_name: '$CI_COMMIT_SHORT_SHA'
+    assets:
+      links:
+        - name: 'compiled pdf'
+          # Use variables to build a URL to access the artifacts
+          # ${CI_PROJECT_URL} is the repository URL
+          # ${BUILD_JOB_ID} is from the previous job,
+          # the build stage, that contains the artifact
+          url: '${CI_PROJECT_URL}/-/jobs/${BUILD_JOB_ID}/artifacts/file/build/glossary.pdf'
+  only:
+    - master # only execute the release if the pipeline runs for the main branch

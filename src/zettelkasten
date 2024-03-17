@@ -11,8 +11,7 @@ cli_help() {
     cli_name=${0##*/}
     echo "
    XETTELKASTEN CLI
-   ------------------------------------
-    Version: $(cat $ZETTEL_WORKDIR/VERSION)
+   ------------------------------------ Version: $(cat $ZETTEL_WORKDIR/VERSION)
     Usage: $cli_name [command]
 
    Commands:
@@ -34,31 +33,30 @@ expand_main() {
     )"
 }
 
-init_kasten() {
-    if [ -d "$ZETTEL_DATA" ]; then
-        info "directory $ZETTEL_DATA already exists."
-        echo "directory $ZETTEL_DATA already exists."
-
-        info "updating preamble"
-        rm -f "${ZETTEL_DATA:?}/${PREAMBLE_FILE:?}"
+copy_files() {
+        log "copy preamble"
         cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
 
-        info "updating mainfile"
-        log "removing old glossary file"
-        rm -f "${ZETTEL_DATA:?}/glossary.tex"
         log "creating new glossary file"
         echo "$(expand_main)" > "$ZETTEL_DATA/glossary.tex" 
+
+        log "copying custom files"
+        for f in "$ZETTEL_WORKDIR"/../custom_files/_*; do
+            [ -f "$f" ] || continue
+            name="$(basename "$f")"
+            new_name="${name#_}"
+            cp "$f" "$ZETTEL_DATA/$new_name"
+        done
+}
+
+init_kasten() {
+    if [ -d "$ZETTEL_DATA" ]; then
+        info "reinitializing"
+        copy_files
         exit
     fi
-
-    info "creating directory $ZETTEL_DATA"
-    mkdir -p "$ZETTEL_DATA"
-
-    info "symlinking preamble"
-    cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
-     
-    info "creating glossary"
-    echo "$(expand_main)" > "$ZETTEL_DATA/glossary.tex" 
+    info "initializing new zettelkasten"
+    copy_files
 }
 
 CMD=$ZETTEL_WORKDIR/commands
@@ -81,6 +79,11 @@ case "$1" in
         check_kasten
         shift
         $CMD/zettel $@
+        ;;
+    git)
+        check_kasten
+        shift
+        $CMD/git $@
         ;;
     status)
         check_kasten

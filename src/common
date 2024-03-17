@@ -8,6 +8,7 @@ log() {
 
 info() {
 	tmux display-message -d 500 "$1" 
+    log "info: $1"
 }
 
 viewing() {
