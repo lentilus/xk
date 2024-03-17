@@ -27,7 +27,7 @@ git_cmd() {
     fi
     
     log "running git" "$@"
-    git "$@"
+    echo "$(git "$@")"
 }
 
 

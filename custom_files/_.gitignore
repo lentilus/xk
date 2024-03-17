@@ -2,5 +2,9 @@
 *.aux
 *.fls
 *.synctex.gz
+*.sla
 *.log
 *.fdb_latexmk
+
+# version controlling pdfs with git sucks
+*.pdf

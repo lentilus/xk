@@ -68,22 +68,22 @@ case "$1" in
     ref)
         check_kasten
         shift
-        $CMD/ref $@
+        "$CMD/ref" "$@"
         ;;
     go)
         check_kasten
         shift
-        $CMD/go $@
+        "$CMD/go" "$@"
         ;;
     zettel)
         check_kasten
         shift
-        $CMD/zettel $@
+        "$CMD/zettel" "$@"
         ;;
     git)
         check_kasten
         shift
-        $CMD/git $@
+        "$CMD/git" "$@"
         ;;
     status)
         check_kasten

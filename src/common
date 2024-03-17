@@ -27,7 +27,6 @@ viewing() {
 
 check_kasten() {
     if ! [[ -d $ZETTEL_DATA ]]; then
-        echo "no zettelkasten - please run init"
         info "no zettelkasten - please run init"
         exit
     fi
