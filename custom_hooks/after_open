@@ -1,6 +1,6 @@
 #!/bin/bash
 
-$NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:VimtexCompileSS<CR>'
 $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:VimtexView<CR>'
+$NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:VimtexCompileSS<CR>'
 
 

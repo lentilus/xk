@@ -1,0 +1,63 @@
+\documentclass{article}
+
+%%% basic packages %%%
+\usepackage{amsmath,amssymb,amsfonts,amsthm} \usepackage{mathdots}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{enumitem}
+
+%%% frame text %%%
+\usepackage[linewidth=1pt]{mdframed}
+\usepackage{framed}
+\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+
+%%% include inkscape drawings %%%
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+
+%%% sections %%%
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{example}{Example}[definition]
+
+%%% custom symbols %%%
+\newcommand{\zz}{\mathrm{Z\kern-.4em\raise-0.5ex\hbox{Z}}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\claim}{\paragraph{Behauptung}}
+
+%%% custom math commands %%%
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\sgn}{sgn}
+
+
+\makeatletter
+
+% nice way to write sets
+\newcommand{\set}[1]{\@ifnextchar\bgroup {\left\{#1\setwithcondition} {\{#1\}} }
+\newcommand{\setwithcondition}[1]{\ \setseperator \ #1 \right\}}
+\newcommand{\setseperator}{\middle|}
+
+\newcommand{\vect}[1]{%
+    % convert all spaces in argument to "\\"
+}
+
+\makeatother
+
+\newenvironment{zettel}[1]
+{
+    \begin{mdframed}
+    \section{#1}
+}
+{ 
+    \end{mdframed}
+}
+\AddToHook{env/zettel/before}{\begin{document}}
+\AddToHook{env/zettel/after}{\end{document}}

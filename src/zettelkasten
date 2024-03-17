@@ -35,7 +35,7 @@ init_kasten() {
 
         info "relinking preamble"
         rm -rf "$ZETTEL_DATA/preamble.link"
-        ln -s "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link"
+        ln -s  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link"
         exit
     fi
 
@@ -43,7 +43,7 @@ init_kasten() {
     mkdir -p "$ZETTEL_DATA"
 
     info "symlinking preamble"
-    ln -s "$ZETTEL_DATA/preamble.link" "$ZETTEL_PREAMBLE"
+    ln -s "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/preamble.link" 
      
 }
 
