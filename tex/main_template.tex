@@ -1,18 +1,49 @@
 \documentclass{article}
 \usepackage[subpreambles=false]{standalone}
 \usepackage{import}
+\usepackage{luacode}
+\usepackage{hyperref}
 
 \title{Xettelkasten Glossary}
 \author{Lentilus}
 \date{\today}
 \input{$PREAMBLE}    
 
-\renewenvironment{zettel}[1]{
-    \section*{#1}
-    \label{#1}
-}{
-    \vspace{15pt}
-}
+\begin{luacode}
+    require 'lfs'
+  
+    function testing(zettel)
+        local file = io.open(zettel.."/references", "r")
+        for line in file:lines() do
+            tex.print("\\hyperlink{"..line.."}{"..line.."}")
+        end
+        file:close()
+        -- this is necessary
+        collectgarbage("collect")
+    end
+
+  function include_files_recursively(directory)
+   for file in lfs.dir(directory) do
+      if file ~= "." and file ~= ".." then
+        local path = directory .. '/' .. file
+        local attr = lfs.attributes(path)
+        if attr.mode == "directory" then
+           include_files_recursively(path)
+        elseif string.match(file, "zettel.tex") then
+           tex.print("\\input{" .. path .. "}")
+        end
+      end
+   end
+  end
+\end{luacode}
+
+\renewenvironment{zettel}[1]{%
+    \hypertarget{#1}{\section*{#1}}
+    \def\temp{#1}
+}{%
+    \expandafter\directlua\expandafter{testing("\temp")}
+    \newpage
+}%
 
 \begin{document}
 
@@ -31,12 +62,7 @@
 \end{mdframed}
 \newpage
 
-%%% TODO
-% - use lualatex to import all zettel here
-% - skip failed zettel!
-
-% ...
-% \import{myzettel/}{zettel}
-% ...
+% \directlua{include_all("./*/zettel.tex")}
+\directlua{include_files_recursively(".")}
 
 \end{document}
