@@ -23,7 +23,7 @@ git_init() {
     fi
 
     log "running git init"
-    # git init
+    git init
 }
 
 git_cmd() {
