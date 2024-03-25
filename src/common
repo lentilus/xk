@@ -28,6 +28,7 @@ viewing() {
 check_kasten() {
     if ! [[ -d $ZETTEL_DATA ]]; then
         info "no zettelkasten - please run init"
+        info "$ZETTEL_DATA does not exist"
         exit
     fi
     log "kasten directory: check passed"

@@ -3,33 +3,46 @@
 set -e
 . "$ZETTEL_WORKDIR/common"
 
+git_check() {
+    if [ -d "$ZETTEL_DATA/.git" ]; then
+        log ".git directory exists"
+        return 0
+    else
+        log ".git direcory does not exist."
+        return 1
+    fi
+}
+
 git_init() {
     log "cd into zettelkasten"
-    cd $ZETTEL_DATA || exit 
+    cd "$ZETTEL_DATA" || exit 
 
-    if [ -d .git ]; then
-        info ".git direcory exists. Aborting"
-        exit 0
+    if git_check; then
+       info "exists aborting"
+       exit 0
     fi
 
     log "running git init"
-    git init
+    # git init
 }
 
 git_cmd() {
     log "cd into zettelkasten"
-    cd $ZETTEL_DATA || exit 
+    cd "$ZETTEL_DATA" || exit 
 
-    if ! [ -d .git ]; then
-        log ".git direcory does not exist. Aborting"
-        info "run zettelkasten git init first."
-        exit 0
-    fi
     
     log "running git" "$@"
     echo "$(git "$@")"
 }
 
+git_publish() {
+   git_check || exit 0;
+   tmux confirm -p "publish new zettel [y/N]" "display-message 'publishing...'" || exit 0
+   git_cmd add -A
+   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   git_cmd commit -m "publish $timestamp"
+   git_cmd push
+}
 
 git_help() {
     command_name=${0##*/}
@@ -47,6 +60,9 @@ git_help() {
 case "$1" in
     init)
         git_init
+        ;;
+    publish)
+        git_publish
         ;;
     help)
         git_help

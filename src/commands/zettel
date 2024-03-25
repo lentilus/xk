@@ -19,7 +19,7 @@ zettel_help() {
 
 expand_template() {
     echo "$(
-        export NAME=$1
+        export NAME="$(echo "$1" | tr '_' ' ')"
         export PREAMBLE=$PREAMBLE_FILE
         envsubst < $ZETTEL_TEMPLATE
     )"

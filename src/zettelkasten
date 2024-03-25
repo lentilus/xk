@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 
 set -e
-export ZETTEL_WORKDIR=$(cd $(dirname $0) && pwd)
+export ZETTEL_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
 export $(cat "$ZETTEL_WORKDIR/../config" | xargs)
 
-. $ZETTEL_WORKDIR/globals
-. $ZETTEL_WORKDIR/common
+. "$ZETTEL_WORKDIR/globals"
+. "$ZETTEL_WORKDIR/common"
 
 cli_help() {
-    cli_name=${0##*/}
+    cli_name="${0##*/}"
     echo "
    XETTELKASTEN CLI
-   ------------------------------------ Version: $(cat $ZETTEL_WORKDIR/VERSION)
+   ------------------------------------ Version: $(cat "$ZETTEL_WORKDIR/VERSION")
     Usage: $cli_name [command]
 
    Commands:
@@ -28,8 +28,8 @@ cli_help() {
 
 expand_main() {
     echo "$(
-        export PREAMBLE=$PREAMBLE_FILE
-        envsubst < $MAIN_TEMPLATE
+        export PREAMBLE="$PREAMBLE_FILE"
+        envsubst < "$MAIN_TEMPLATE"
     )"
 }
 
@@ -56,6 +56,7 @@ init_kasten() {
         exit
     fi
     info "initializing new zettelkasten"
+    mkdir "$ZETTEL_DATA"
     copy_files
 }
 

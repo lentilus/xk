@@ -33,7 +33,7 @@ ref_rm() {
     ref_file="$(reference_file "$(viewing)")"
     echo "$ref_file"
     selected="$(cat "$ref_file" | fzf-tmux)" || exit
-	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" && echo confirmed
+	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" || log "not confirmed, exiting" && exit
 	log "removing $selected from references"
     cat "$ref_file" | grep -v -x "$selected" > /tmp/zettelkasten_ref_cache
 	mv /tmp/zettelkasten_ref_cache "$ref_file"
