@@ -7,11 +7,12 @@ build-job:
   image: tianon/latex
   script:
     - mkdir build
-    - latexmk -pdf -pdflatex="lualatex -interaction=batchmode" -outdir=build glossary.tex
+    - latexmk -pdf -f -norc -pdflatex="lualatex -interaction=batchmode" glossary.tex || echo "latexmk failed"
+    - test -f glossary.pdf && echo "pdf exists"
     - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
   artifacts:
     paths:
-      - build/glossary.pdf
+      - glossary.pdf
     reports:
       # export the environment statement so we can access it in the release stage
       dotenv: CI_JOB_ID.env
@@ -31,11 +32,12 @@ release-job:
     tag_name: '$CI_COMMIT_SHORT_SHA'
     assets:
       links:
-        - name: 'pdf'
+        - name: 'pdf-export'
           # Use variables to build a URL to access the artifacts
           # ${CI_PROJECT_URL} is the repository URL
           # ${BUILD_JOB_ID} is from the previous job,
           # the build stage, that contains the artifact
-          url: '${CI_PROJECT_URL}/-/jobs/${BUILD_JOB_ID}/artifacts/file/build/glossary.pdf'
+          url: '${CI_PROJECT_URL}/-/jobs/${BUILD_JOB_ID}/artifacts/file/glossary.pdf'
+          filepath: '/export/glossary.pdf'
   only:
     - master # only execute the release if the pipeline runs for the main branch

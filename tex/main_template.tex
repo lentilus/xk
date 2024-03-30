@@ -15,19 +15,24 @@ require 'lfs'
 
 function refs(zettel)
     if io.open(zettel.."/references", "r") == nil then
-        tex.print("no references")
+        tex.print("\\newline","\\newline", "\\textit{no references}")
     elseif io.open(zettel.."/references", "r") == "" then
-        tex.print("no references")
+        tex.print("\\newline","\\newline", "\\textit{no references}")
     else
         local file = io.open(zettel.."/references", "r")
-        tex.print("","\\textbf{References}")
-        tex.print("\\begin{itemize}")
+        tex.print("\\begin{itemize}", "\\renewcommand{\\labelitemi}{$\\rightarrow$}")
+        local no_reference = true
         for line in file:lines() do
             line = line:gsub("_", " ")
-            tex.print("\\item \\hyperlink{"..line.."}{"..line.."}")
+            tex.print("\\item \\hyperlink{"..line.."}{\\textit{"..line.."}}")
+            no_reference = false
         end
         tex.print("\\end{itemize}")
         file:close()
+
+        if no_reference then
+            tex.print("\\newline","\\newline", "\\textit{no references}")
+        end
         -- this is necessary
         collectgarbage("collect")
     end
