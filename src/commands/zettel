@@ -70,18 +70,23 @@ new_zettel() {
 }
 
 del_zettel() {
-    log "delete zettel not implemented"
-    echo delete zettel
+    selected="$(viewing)"
+    log "asking to delete $selected ..."
+	tmux confirm -p "remove zettel \"$selected\" [y/N]" "" || exit
+    log "removing zettel"
+    rm -r "$ZETTEL_DATA/${selected:?}"
+    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:intro<CR>'
+    log "zettel removed"
 }
 
 case "$1" in
     new)
         shift
-        new_zettel $@
+        new_zettel "$@"
         ;;
     del)
         shift
-        del_zettel $@
+        del_zettel
         ;;
     *)
         zettel_help
