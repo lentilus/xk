@@ -7,8 +7,7 @@ build-job:
   image: tianon/latex
   script:
     - mkdir build
-    # - pdflatex -output-directory=build main.tex 
-    - latexmk -pdf -pdflatex="lualatex -file-line-error %O %S" -outdir=build glossary.tex
+    - latexmk -pdf -pdflatex="lualatex -interaction=batchmode" -outdir=build glossary.tex
     - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
   artifacts:
     paths:
@@ -32,7 +31,7 @@ release-job:
     tag_name: '$CI_COMMIT_SHORT_SHA'
     assets:
       links:
-        - name: 'compiled pdf'
+        - name: 'pdf'
           # Use variables to build a URL to access the artifacts
           # ${CI_PROJECT_URL} is the repository URL
           # ${BUILD_JOB_ID} is from the previous job,

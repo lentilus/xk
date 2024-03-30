@@ -1,4 +1,5 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
+% \usepackage[a4paper,left=2cm]{geometry}
 \usepackage[subpreambles=false]{standalone}
 \usepackage{import}
 \usepackage{luacode}
@@ -6,63 +7,76 @@
 
 \title{Xettelkasten Glossary}
 \author{Lentilus}
-\date{\today}
-\input{$PREAMBLE}    
+\date{compiled on \today}
+\input{standalone_preamble.tex}    
 
 \begin{luacode}
-    require 'lfs'
-  
-    function testing(zettel)
+require 'lfs'
+
+function refs(zettel)
+    if io.open(zettel.."/references", "r") == nil then
+        tex.print("no references")
+    elseif io.open(zettel.."/references", "r") == "" then
+        tex.print("no references")
+    else
         local file = io.open(zettel.."/references", "r")
+        tex.print("","\\textbf{References}")
+        tex.print("\\begin{itemize}")
         for line in file:lines() do
-            tex.print("\\hyperlink{"..line.."}{"..line.."}")
+            line = line:gsub("_", " ")
+            tex.print("\\item \\hyperlink{"..line.."}{"..line.."}")
         end
+        tex.print("\\end{itemize}")
         file:close()
         -- this is necessary
         collectgarbage("collect")
     end
+end
 
-  function include_files_recursively(directory)
-   for file in lfs.dir(directory) do
-      if file ~= "." and file ~= ".." then
-        local path = directory .. '/' .. file
-        local attr = lfs.attributes(path)
-        if attr.mode == "directory" then
-           include_files_recursively(path)
-        elseif string.match(file, "zettel.tex") then
-           tex.print("\\input{" .. path .. "}")
+local function sort_alphabetical(a, b)
+    return a:lower() < b:lower()
+end
+
+-- this function sucks, it should not be recursive
+function include_zettel(directory)
+    local files = {}
+    for file in lfs.dir(directory) do
+        table.insert(files, file)
+    end
+    table.sort(files, sort_alphabetical)
+
+    for index,file in pairs(files) do
+        if file ~= "." and file ~= ".." then
+            local path = directory .. '/' .. file
+            local attr = lfs.attributes(path)
+            if attr.mode == "directory" then
+                include_zettel(path)
+            elseif string.match(file, "zettel.tex") then
+                tex.print("\\input{" .. path .. "}")
+            end
         end
-      end
-   end
-  end
+    end
+end
 \end{luacode}
 
 \renewenvironment{zettel}[1]{%
+    \begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
     \hypertarget{#1}{\section*{#1}}
     \def\temp{#1}
 }{%
-    \expandafter\directlua\expandafter{testing("\temp")}
-    \newpage
+    \expandafter\directlua\expandafter{refs("\temp")}
+    \end{mdframed}
 }%
 
 \begin{document}
 
 \maketitle
 
-\begin{mdframed}
-   This file is the compiled pdf of Lentilus' Zettelkasten.
-
-   This pdf will get autcompiled using LuaLatex on Gitlab.com.
-
-   For an up-to-date version please check (url).
-
-   Each zettel (section) contains an atomic idea/concept/definition.
-
-   %...
+\begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+   This pdf you are viewing is a visualization of Lentilus' zettelkasten. To learn more read this \hyperlink{Intro}{zettel}.
 \end{mdframed}
 \newpage
 
-% \directlua{include_all("./*/zettel.tex")}
-\directlua{include_files_recursively(".")}
+\directlua{include_zettel(".")}
 
 \end{document}
