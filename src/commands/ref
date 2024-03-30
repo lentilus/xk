@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 . "$ZETTEL_WORKDIR/common"
 
@@ -31,12 +30,15 @@ ref_add() {
 ref_rm() {
     zettel_session
     ref_file="$(reference_file "$(viewing)")"
-    echo "$ref_file"
+    log "reference file:" "$ref_file"
     selected="$(cat "$ref_file" | fzf-tmux)" || exit
-	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" || log "not confirmed, exiting" && exit
+    log "selected: " "$selected"
+	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" || exit
+    log "confirmed"
 	log "removing $selected from references"
-    cat "$ref_file" | grep -v -x "$selected" > /tmp/zettelkasten_ref_cache
-	mv /tmp/zettelkasten_ref_cache "$ref_file"
+    log "$(cat "$ref_file" | grep -v -x "$selected" > /tmp/zettelkasten_ref_cache)"
+    log "updated references: " "$(cat /tmp/zettelkasten_ref_cache)"
+    mv /tmp/zettelkasten_ref_cache "$ref_file"
 }
 
 case "$1" in
