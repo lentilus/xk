@@ -1,28 +1,11 @@
 #!/usr/bin/env bash
 
+source "$ZETTEL_WORKDIR/editor"
+
 log() {
 	script_name=${0##*/}
 	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 	>&2 echo "== $script_name $timestamp" "$@" 
-}
-
-info() {
-	tmux display-message -d 500 "$1" 
-    log "info: $1"
-}
-
-viewing() {
-    nvim --server "$NVIM_PIPE" \
-        --remote-expr "expand('%')" &> /tmp/zettelkasten_open
-
-    open=$(</tmp/zettelkasten_open)
-
-    if [[ -z $open ]];
-    then
-        exit 1
-    else
-        echo "$(cd "$ZETTEL_DATA"; basename "$(dirname "$open")")" || exit
-    fi
 }
 
 check_kasten() {
@@ -34,24 +17,6 @@ check_kasten() {
     log "kasten directory: check passed"
 }
 
-zettel_session() {
-    if ! tmux has-session -t="$SESSION_NAME" 2> /dev/null; then
-		log "creating new session"
-
-		log "removing old pipe"
-		rm -rf "$NVIM_PIPE"
-
-        cmd="$NVIM_CMD --listen $NVIM_PIPE"
-		log "$cmd"
-
-		log "$(tmux new-session -c "$ZETTEL_DATA" -d -s "$SESSION_NAME" "$cmd")"
-        sleep 0.2
-    fi
-
-	log "tmux switch client"
-    tmux switch-client -t "$SESSION_NAME"
-}
-
 reference_file() {
     current_zettel=$1
     references="$ZETTEL_DATA/$current_zettel/${REFERENCE_FILENAME}"
@@ -59,7 +24,6 @@ reference_file() {
 }
 
 open_zettel() {
-
     log "before open hook..."
     "$ZETTEL_WORKDIR/../custom_hooks/before_open" "$(viewing)" || log "before open hool failed"
 
@@ -78,7 +42,7 @@ open_zettel() {
         exit
     fi
 	log "nvim remote"
-    "$NVIM_CMD" --server "$NVIM_PIPE" --remote "$filepath"
+    editor_edit "$filepath"
 
     log "after open hook"
     "$ZETTEL_WORKDIR/../custom_hooks/after_open" "$(viewing)" || log "after open hool failed"
@@ -90,21 +54,4 @@ zettel_list() {
     do
         printf %"s\n" "$(basename "$zettel")"
     done
-}
-
-
-user_input() {
-    log "getting user input"
-    nvim --server "$NVIM_PIPE" \
-        --remote-expr "input('$1', '$2', 'file')" &> /tmp/zettelkasten_input
-
-    open=$(</tmp/zettelkasten_input)
-    log "result is $open"
-
-    if [[ -z $open ]];
-    then
-        exit 1
-    else
-        echo "$open"
-    fi
 }

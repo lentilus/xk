@@ -4,8 +4,8 @@ set -e
 export ZETTEL_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
 export $(cat "$ZETTEL_WORKDIR/../config" | xargs)
 
-. "$ZETTEL_WORKDIR/globals"
-. "$ZETTEL_WORKDIR/common"
+source "$ZETTEL_WORKDIR/globals"
+source "$ZETTEL_WORKDIR/common"
 
 cli_help() {
     cli_name="${0##*/}"
