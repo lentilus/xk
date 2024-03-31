@@ -15,24 +15,36 @@ require 'lfs'
 
 function refs(zettel)
     if io.open(zettel.."/references", "r") == nil then
-        tex.print("\\newline","\\newline", "\\textit{no references}")
-    elseif io.open(zettel.."/references", "r") == "" then
-        tex.print("\\newline","\\newline", "\\textit{no references}")
+        tex.print("\\newline", "\\textit{no references}")
+        texio.write_nl("no reference file")
     else
-        local file = io.open(zettel.."/references", "r")
-        tex.print("\\begin{itemize}", "\\renewcommand{\\labelitemi}{$\\rightarrow$}")
+        local test = io.open(zettel.."/references", "r")
         local no_reference = true
-        for line in file:lines() do
-            line = line:gsub("_", " ")
-            tex.print("\\item \\hyperlink{"..line.."}{\\textit{"..line.."}}")
-            no_reference = false
+        for line in test:lines() do
+            if line ~= "" then
+                no_reference = false
+            end
         end
-        tex.print("\\end{itemize}")
-        file:close()
+        test:close()
 
         if no_reference then
-            tex.print("\\newline","\\newline", "\\textit{no references}")
+            tex.print("\\newline", "\\textit{no references}")
+            texio.write_nl("empty references file")
+        else
+            local file = io.open(zettel.."/references", "r")
+            tex.print("\\begin{itemize}", "\\renewcommand{\\labelitemi}{$\\rightarrow$}")
+            for line in file:lines() do
+                if line ~= "" then
+                    line = line:gsub("_", " ")
+                    tex.print("\\item \\hyperlink{"..line.."}{\\textit{"..line.."}}")
+                    texio.write_nl("printing reference:")
+                    texio.write_nl(line)
+                end
+            end
+            tex.print("\\end{itemize}")
+            file:close()
         end
+
         -- this is necessary
         collectgarbage("collect")
     end
@@ -71,6 +83,7 @@ end
 }{%
     \expandafter\directlua\expandafter{refs("\temp")}
     \end{mdframed}
+    \directlua{texio.write_nl("debug: end of zettel")}
 }%
 
 \begin{document}

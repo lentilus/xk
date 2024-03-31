@@ -1,11 +1,12 @@
-# ignore build files
+# ignore build files and artifacts
+build
 *.aux
 *.fls
 *.sla
+*.sta
 *.log
 *.out
 *.fdb_latexmk
 *.synctex.gz
-
-# version controlling pdfs with git sucks
 *.pdf
+
