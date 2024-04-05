@@ -41,7 +41,7 @@ copy_files() {
         echo "$(expand_main)" > "$ZETTEL_DATA/glossary.tex" 
 
         log "copying custom files"
-        for f in "$ZETTEL_WORKDIR"/../custom_files/_*; do
+        for f in "$ZETTEL_WORKDIR"/../base/_*; do
             [ -f "$f" ] || continue
             name="$(basename "$f")"
             new_name="${name#_}"

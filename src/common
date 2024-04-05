@@ -10,8 +10,8 @@ log() {
 
 check_kasten() {
     if ! [[ -d $ZETTEL_DATA ]]; then
-        info "no zettelkasten - please run init"
         info "$ZETTEL_DATA does not exist"
+        info "no zettelkasten - please run init"
         exit
     fi
     log "kasten directory: check passed"
@@ -25,31 +25,29 @@ reference_file() {
 
 open_zettel() {
     log "before open hook..."
-    "$ZETTEL_WORKDIR/../custom_hooks/before_open" "$(viewing)" || log "before open hool failed"
+    "$ZETTEL_WORKDIR/../hooks/before_open" "$(viewing)" || log "before open hool failed"
 
 	log "open zettel $1"
     zettel=$(basename "$1")
     if [[ -z $zettel ]]; then
-		log "nothing to do, exiting"
         info "nothing to do"
         exit
     fi
     filepath="$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME"
 	log "filepath: $filepath"
     if ! [[ -f $filepath ]]; then
-		log "does not exist"
         info "$zettel does not exist."
         exit
     fi
-	log "nvim remote"
     editor_edit "$filepath"
+    # info "$zettel"
 
     log "after open hook"
-    "$ZETTEL_WORKDIR/../custom_hooks/after_open" "$(viewing)" || log "after open hool failed"
+    "$ZETTEL_WORKDIR/../hooks/after_open" "$(viewing)" || log "after open hool failed"
 }
 
 zettel_list() {
-    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d)"
+    list="$(find "$ZETTEL_DATA" -not -path "$ZETTEL_DATA/.*" -mindepth 1 -maxdepth 1 -type d)"
     for zettel in $list
     do
         printf %"s\n" "$(basename "$zettel")"

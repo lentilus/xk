@@ -58,4 +58,32 @@ tmux run-shell -b "/path/to/src/zettelkasten ref add"
 tmux run-shell -b "/path/to/src/zettelkasten go ref"
 # ...
 ```
+## Git integration
 
+with the following syntax you can use your zettelkasten in combination with git.
+```bash
+zettelkasten git init
+zettelkasten git foo
+```
+
+## Gitlab CI - Auto-Glossary
+
+```bash
+zettelkasten git remote add origin foo
+zettelkasten publish
+```
+Note: publish is essentially like a combination of
+```bash
+zettelkasten git add -A
+zettelkasten git commit -m "foo"
+zettelkasten git push
+```
+If you commit a zettelkasten to gitlab (which is encuraged), a glossary of all zettel is created automatically. This is done using Gitlab CI with a predefined configuration that is part of the base directory.
+
+To see an example for a zettelkasten on Gitlab along with an auto-generated glossary check out my "Zettelkasten of Mathematics"
+- repo: https://gitlab.com/lentilus/zettelkasten-of-mathematics/ 
+- most recent glossary: https://gitlab.com/lentilus/zettelkasten-of-mathematics/-/releases/permalink/latest/downloads/export/glossary.pdf
+
+## Anki Export
+
+> coming soon!
