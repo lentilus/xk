@@ -8,7 +8,8 @@ build-job:
   script:
     - mkdir build
     - latexmk -pdf -f -norc -pdflatex="lualatex -interaction=batchmode" glossary.tex || echo "latexmk failed"
-    - test -f glossary.pdf && echo "pdf exists"
+    - echo "check if pdf was produced"
+    - test -f glossary.pdf || exit
     - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
   artifacts:
     paths:
