@@ -7,15 +7,16 @@
 %%% frame text %%%
 \usepackage[linewidth=1pt]{mdframed}
 \usepackage{framed}
+\usepackage{tcolorbox}
 \definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
 
 %%% include inkscape drawings %%%
 \usepackage{import}
 \usepackage{xifthen}
 \usepackage{pdfpages}
-\usepackage{transparent}
+\usepackage{transparent} %%% sections %%%
+\usepackage{comment}
 
-%%% sections %%%
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -59,9 +60,17 @@
 
 \newenvironment{zettel}[1]
 {
-    \begin{mdframed}
-    \section{#1}
+    \begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+    \section*{#1}
 }
 {
     \end{mdframed}
 }
+\newenvironment{flashcard}
+{
+    \begin{tcolorbox}[width=\linewidth, sharp corners=all, colback=white!97!black, boxrule=0pt]
+}
+{
+    \end{tcolorbox} 
+}
+\newenvironment{question}{\paragraph{Question} }{\vspace{5pt}}

@@ -47,7 +47,7 @@ open_zettel() {
 }
 
 zettel_list() {
-    list="$(find "$ZETTEL_DATA" -not -path "$ZETTEL_DATA/.*" -mindepth 1 -maxdepth 1 -type d)"
+    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d -not -path "$ZETTEL_DATA/.*")"
     for zettel in $list
     do
         printf %"s\n" "$(basename "$zettel")"
