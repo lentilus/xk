@@ -86,4 +86,5 @@ To see an example for a zettelkasten on Gitlab along with an auto-generated glos
 
 ## Anki Export
 
-> coming soon!
+- check out https://gitlab.com/lentilus/xettel-to-anki
+> gets integrated into gitlab ci

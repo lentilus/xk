@@ -2,7 +2,7 @@ stages:
   - build
   - release
 
-build-job:
+compile-glossary:
   stage: build
   image: tianon/latex
   script:
@@ -10,22 +10,37 @@ build-job:
     - latexmk -pdf -f -norc -pdflatex="lualatex -interaction=batchmode" glossary.tex || echo "latexmk failed"
     - echo "check if pdf was produced"
     - test -f glossary.pdf || exit
-    - echo BUILD_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
+    - echo GLOSSARY_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
   artifacts:
     paths:
       - glossary.pdf
     reports:
       # export the environment statement so we can access it in the release stage
       dotenv: CI_JOB_ID.env
+
+export-anki-flashcards:
+  stage: build
+  image: python:latest
+  script:
+    - pip install git+https://gitlab.com/lentilus/xettel-to-anki.git
+    - xetteltoanki ./ zettelkasten.apkg
+    - echo ANKI_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
+  artifacts:
+    paths:
+      - zettelkasten.apkg
+    reports:
+      # export the environment statement so we can access it in the release stage
+      dotenv: CI_JOB_ID.env
+
 release-job:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: build-job
+    - job: compile-glossary
+    - job: export-anki-flashcards
       artifacts: true
   script:
-    - echo "release application..."
-    - echo "Application successfully released."
+    - echo "creating release..."
   release:
     name: 'Release Executables $CI_COMMIT_SHORT_SHA'
     description: 'Created using the release-cli'
@@ -33,12 +48,11 @@ release-job:
     tag_name: '$CI_COMMIT_SHORT_SHA'
     assets:
       links:
-        - name: 'pdf-export'
-          # Use variables to build a URL to access the artifacts
-          # ${CI_PROJECT_URL} is the repository URL
-          # ${BUILD_JOB_ID} is from the previous job,
-          # the build stage, that contains the artifact
-          url: '${CI_PROJECT_URL}/-/jobs/${BUILD_JOB_ID}/artifacts/file/glossary.pdf'
+        - name: 'glossary.pdf'
+          url: '${CI_PROJECT_URL}/-/jobs/${GLOSSARY_JOB_ID}/artifacts/file/glossary.pdf'
           filepath: '/export/glossary.pdf'
+        - name: 'zettelkasten.apkg'
+          url: '${CI_PROJECT_URL}/-/jobs/${ANKI_JOB_ID}/artifacts/file/zettelkasten.apkg'
+          filepath: '/export/zettelkasten.apkg'
   only:
     - master # only execute the release if the pipeline runs for the main branch
