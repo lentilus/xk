@@ -1,41 +1,47 @@
-%%% basic packages %%%
-\usepackage{amsmath,amssymb,amsfonts,amsthm} \usepackage{mathdots}
+% basics
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{thmtools}
+\usepackage{mathtools} % prettier math
+\usepackage{mathdots}
 \usepackage{enumitem}
+\usepackage{comment}
 
-%%% frame text %%%
+% frames
 \usepackage[linewidth=1pt]{mdframed}
 \usepackage{framed}
 \usepackage{tcolorbox}
 \definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
 
-%%% include inkscape drawings %%%
+% graphics
 \usepackage{import}
 \usepackage{xifthen}
 \usepackage{pdfpages}
-\usepackage{transparent} %%% sections %%%
-\usepackage{comment}
 
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{corollary}{Corollary}[theorem]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{definition}{Definition}
-\newtheorem{axiom}{Axiom}
-\newtheorem{example}{Example}[definition]
+% amsthm config
+\declaretheoremstyle[notebraces={[}{]},headpunct= ,]{custom}
 
-%%% custom symbols %%%
+\theoremstyle{custom}
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{corollary}{Corollary}
+
+\theoremstyle{custom}
+\newtheorem*{axiom}{Axiom}
+\newtheorem*{definition}{Definition}
+\newtheorem*{example}{Example}
+
+% symbol shortcuts
 \newcommand{\zz}{\mathrm{Z\kern-.4em\raise-0.5ex\hbox{Z}}}
+\newcommand{\tx}[1]{\text{ #1 }}
+\newcommand{\La}{\mathcal{L}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\K}{\mathbb{K}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Q}{\mathbb{Q}}
 
-\newcommand{\La}{\mathcal{L}}
-
-\newcommand{\claim}{\paragraph{Behauptung}}
-
-%%% custom math commands %%%
+% math operators
 \DeclareMathOperator{\Mat}{Mat}
 \DeclareMathOperator{\sgn}{sgn}
 \DeclareMathOperator{\Eig}{Eig}
@@ -44,6 +50,9 @@
 \DeclareMathOperator{\End}{End}
 \DeclareMathOperator{\GL}{GL}
 
+% misc
+\setlength\parindent{0pt}
+
 \makeatletter
 
 % nice way to write sets
@@ -51,26 +60,20 @@
 \newcommand{\setwithcondition}[1]{\ \setseperator \ #1 \right\}}
 \newcommand{\setseperator}{\middle|}
 
-\newcommand{\vect}[1]{%
-    % convert all spaces in argument to "\\"
-}
-
 \makeatother
-\setlength\parindent{0pt}
 
 \newenvironment{zettel}[1]
 {
-    \begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+    \begin{mdframed}[%
+        nobreak=true,%
+        topline=false,%
+        bottomline=false,%
+        rightline=false%
+        ]
     \section*{#1}
 }
 {
     \end{mdframed}
 }
-\newenvironment{flashcard}
-{
-    % \begin{tcolorbox}[width=\linewidth, sharp corners=all, colback=white!97!black, boxrule=0pt]
-}
-{
-    % \end{tcolorbox} 
-}
-\newenvironment{question}{\paragraph{Question} }{\vspace{5pt}}
+\newenvironment{flashcard}{}{}
+\newenvironment{question}{\paragraph{Question}}{\vspace{5pt}}

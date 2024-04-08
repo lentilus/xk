@@ -75,7 +75,8 @@ del_zettel() {
 	tmux confirm -p "remove zettel \"$selected\" [y/N]" "" || exit
     log "removing zettel"
     rm -r "$ZETTEL_DATA/${selected:?}"
-    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:intro<CR>'
+    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:bp<CR>'
+    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:bd#<CR>'
     log "zettel removed"
 }
 
