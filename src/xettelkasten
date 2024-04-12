@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e
+ZETTEL_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+export ZETTEL_WORKDIR
+export  $(xargs -a "$ZETTEL_WORKDIR/../config") # word splitting intetional
+
+source "$ZETTEL_WORKDIR/utils"
+
+CMD=$ZETTEL_WORKDIR/commands
+
+case "$1" in
+    ref)
+        shift
+        check_kasten
+        "$CMD/ref" "$@"
+        ;;
+    tag)
+        shift
+        check_kasten
+        "$CMD/tag" "$@"
+        ;;
+    git)
+        shift
+        check_kasten
+        "$CMD/git" "$@"
+        ;;
+    *) # zettel
+        [[ $2 == "init" ]] || check_kasten
+        "$CMD/zettel" "$@"
+        ;;
+esac

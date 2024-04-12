@@ -1,15 +1,17 @@
 #!/bin/bash
 
-export NVIM_PIPE=/tmp/$NVIM_PIPE
-export SESSION_NAME="--XeTtelkasten--"
+# templates
 export ZETTEL_TEMPLATE="$ZETTEL_WORKDIR/../tex/template.tex"
 export MAIN_TEMPLATE="$ZETTEL_WORKDIR/../tex/main_template.tex"
+
+# targets
 export PREAMBLE_FILE="standalone_preamble.tex"
 export ZETTEL_PREAMBLE="$ZETTEL_WORKDIR/../tex/standalone_preamble.tex"
 
 # structure
 export ZETTEL_FILENAME=zettel.tex
 export REFERENCE_FILENAME=references
+export TAG_FILENAME=tags
 
 # directory stucture of a zettelkasten
 # with the zettels foo and bar
@@ -17,7 +19,9 @@ export REFERENCE_FILENAME=references
 # $ZETTEL_DATA
 # ├── bar
 # │   ├── $REFERENCE_FILENAME
+# │   ├── $TAG_FILENAME
 # │   └── $ZETTEL_FILENAME
 # └── foo
 #     ├── $REFERENCE_FILENAME
+#     ├── $TAG_FILENAME
 #     └── $ZETTEL_FILENAME

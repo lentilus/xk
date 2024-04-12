@@ -1,54 +1,73 @@
 #!/bin/bash
 set -e
-. "$ZETTEL_WORKDIR/common"
+source "$ZETTEL_WORKDIR/utils"
 
-ref_help() {
-    command_name=${0##*/}
-    echo "
-    $command_name
-    Usage: $cli_name $command_name [command]
-    Commands:
-    add      **add** new reference to current zettel
-    rm       **remove** reference from current zettel
-    *         Help
-    "
-    exit 1
+parse_args() {
+    OPTSTRING=":z:r:"
+
+    while getopts ${OPTSTRING} opt; do
+        case ${opt} in
+            z)
+                zettel=$OPTARG
+                ;;
+            r)
+                ref=$OPTARG
+                ;;
+            :)
+                echo "missing args"; exit
+                ;;
+            ?)
+                echo "invalid option."; exit
+                ;;
+        esac
+    done
+
+    case "$zettel" in
+        *\ * )
+            info "name may not contain spaces"; exit
+            ;;
+    esac
+    echo "zettel='$zettel'; ref='$ref'"
 }
 
-ref_add() {
-    zettel_session
-    selected=$(zettel_list | fzf-tmux) || exit
-
-    # if reference is already in references there is nothing todo
-    if ! [[ -z "$(cat "$(reference_file "$(viewing)")" | grep -x "$selected")" ]]; then
+ref_insert() {
+    shift && eval "$(parse_args "$@")"
+    if grep -q "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
+        log "reference already present"
         exit
     fi
 
-    echo "$selected" >> "$(reference_file "$(viewing)")"
+    echo "$ref" >> "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
+}
+
+ref_ls() {
+    shift && eval "$(parse_args "$@")"
+    grep -v ^$ "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || log "error during ref ls"
 }
 
 ref_rm() {
-    zettel_session
-    ref_file="$(reference_file "$(viewing)")"
-    log "reference file:" "$ref_file"
-    selected="$(cat "$ref_file" | fzf-tmux)" || exit
-    log "selected: " "$selected"
-	tmux confirm -p "remove reference \"$selected\" [y/N]" "display-message 'removed'" || exit
-    log "confirmed"
-	log "removing $selected from references"
-    log "$(cat "$ref_file" | grep -v -x "$selected" > /tmp/zettelkasten_ref_cache)"
-    log "updated references: " "$(cat /tmp/zettelkasten_ref_cache)"
-    mv /tmp/zettelkasten_ref_cache "$ref_file"
+    shift && eval "$(parse_args "$@")"
+
+    if ! grep -q "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
+        log "reference not present"
+        exit
+    fi
+
+    updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")"
+    echo "$updated" > "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
 }
 
 case "$1" in
-    add)
-        ref_add
+    insert)
+        ref_insert "$@"
+        ;;
+    ls)
+        ref_ls "$@"
         ;;
     rm)
-        ref_rm
+        ref_rm "$@"
         ;;
     *)
-        ref_help
+        echo "invalid ref command $1"
         ;;
 esac

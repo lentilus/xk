@@ -1,95 +1,149 @@
 #!/bin/bash
 
 set -e
-. "$ZETTEL_WORKDIR/common"
+source "$ZETTEL_WORKDIR/utils"
+
+parse_args() {
+    OPTSTRING=":z:p:"
+
+    while getopts ${OPTSTRING} opt; do
+        case ${opt} in
+            z)
+                zettel=$OPTARG
+                ;;
+            p)
+                path=$OPTARG
+                ;;
+            :)
+                echo "missing args"; exit
+                ;;
+            ?)
+                echo "invalid option."; exit
+                ;;
+        esac
+    done
+
+    echo "zettel='$zettel'; path='$path'"
+}
+
+expand_main() (
+        # populate subshell with vars
+        export PREAMBLE="$PREAMBLE_FILE"
+        envsubst < "$MAIN_TEMPLATE"
+    )
+
+expand_template() (
+        # populate subshell with vars
+        NAME="$(echo "$1" | tr '_' ' ')"
+        export NAME
+        export PREAMBLE="$PREAMBLE_FILE"
+        envsubst < "$ZETTEL_TEMPLATE"
+    )
+
+copy_files() {
+        log "copy preamble"
+
+        cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
+        expand_main > "$ZETTEL_DATA/glossary.tex" 
+        for f in "$ZETTEL_WORKDIR"/../base/_*; do
+            [ -f "$f" ] || continue
+            name="$(basename "$f")"
+            new_name="${name#_}"
+            cp "$f" "$ZETTEL_DATA/$new_name"
+        done
+}
+
+zettel_init() {
+    if [ -d "$ZETTEL_DATA" ]; then
+        info "reinitializing"
+        copy_files
+        exit
+    fi
+    info "initializing new zettelkasten"
+    mkdir "$ZETTEL_DATA" || log "failed to init"
+    copy_files
+}
 
 
-zettel_help() {
-    command_name=${0##*/}
-    echo "
-    $command_name
-    Usage: $cli_name $command_name [command]
-    Commands:
-    new       create a new zettel
-    del       delete an existing zettel
-    *         Help
-    "
+zettel_ls() {
+    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d -not -path "$ZETTEL_DATA/.*")"
+    for zettel in $list
+    do
+        printf %"s\n" "$(basename "$zettel")"
+    done
+}
+
+zettel_rm() {
+    eval "$(parse_args "$@")"
+    rm -r "$ZETTEL_DATA/${zettel:?}" || log "error removing zettel"
+}
+
+zettel_path() {
+    eval "$(parse_args "$@")"
+
+    if [[ -n $zettel ]]; then
+        [[ -d  "$ZETTEL_DATA/$zettel" ]] || exit 1
+        echo "$ZETTEL_DATA/$zettel"
+        exit
+    elif [[ -n $path ]]; then 
+        supplied="$(dirname "$(dirname "$path")")"
+
+        # test validity of path
+        [[ "$ZETTEL_DATA" -ef "$supplied" ]] || exit 1
+        [[ -f $path ]] || exit 1
+        
+        basename "$(dirname "$path")"
+        exit
+    fi
     exit 1
 }
 
-expand_template() {
-    echo "$(
-        export NAME="$(echo "$1" | tr '_' ' ')"
-        export PREAMBLE=$PREAMBLE_FILE
-        envsubst < $ZETTEL_TEMPLATE
-    )"
-}
-
-new_zettel() {
-    OPTSTRING=":n:"
-
-    while getopts ${OPTSTRING} opt; do
-      case ${opt} in
-        n)
-          NAME=$OPTARG
-          ;;
-        :)
-          echo "Option -${OPTARG} requires an argument."
-          exit 1
-          ;;
-        ?)
-          echo "Invalid option: -${OPTARG}."
-          exit 1
-          ;;
-      esac
-    done
+zettel_insert() {
+    eval "$(parse_args "$@")"
     
-    if [ -z $NAME ]; then
-        zettel_session
-        NAME=$(user_input "name: " "") || exit
-    fi
-    
-    case $NAME in
-        *\ * )
-            info "name may not contain spaces"; exit
-            ;;
-    esac
+    zettel=${zettel// /_}
 
-    if [ -d $ZETTEL_DATA/$NAME ]; then
-        info "name already in use - provide a unique name"
-        log "zettel with same name exists, aborting"
+    if [ -d "$ZETTEL_DATA/$zettel" ]; then
+        log "$zettel exists, aborting"
         exit
     fi
 
-    log "trying to create new zettel $NAME"
-
-    mkdir $ZETTEL_DATA/$NAME
-    echo "$(expand_template $NAME)"> "$ZETTEL_DATA/$NAME/$ZETTEL_FILENAME"
-    touch "$ZETTEL_DATA/$NAME/$REFERENCE_FILENAME"
-    open_zettel $NAME
+    mkdir "$ZETTEL_DATA/$zettel" || exit
+    expand_template "$zettel" > "$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME"
+    touch "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || exit
+    touch "$ZETTEL_DATA/$zettel/$TAG_FILENAME" || exit
+    log "created $zettel"
+    echo "$zettel"
 }
 
-del_zettel() {
-    selected="$(viewing)"
-    log "asking to delete $selected ..."
-	tmux confirm -p "remove zettel \"$selected\" [y/N]" "" || exit
-    log "removing zettel"
-    rm -r "$ZETTEL_DATA/${selected:?}"
-    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:bp<CR>'
-    $NVIM_CMD --server "$NVIM_PIPE" --remote-send '<C-\><C-N>:bd#<CR>'
-    log "zettel removed"
-}
 
 case "$1" in
-    new)
+    init)
         shift
-        new_zettel "$@"
+        zettel_init
         ;;
-    del)
+    ls)
         shift
-        del_zettel
+        zettel_ls
+        ;;
+    rm)
+        shift
+        zettel_rm "$@"
+        ;;
+    mv)
+        shift
+        echo "not implemented"
+        exit #TODO
+        ;;
+    path)
+        shift
+        zettel_path "$@"
+        ;;
+    insert)
+        shift
+        zettel_insert "$@"
         ;;
     *)
-        zettel_help
+        echo "invalid top level command $1."
         ;;
 esac

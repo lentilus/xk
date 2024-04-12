@@ -1,0 +1,77 @@
+#!/bin/bash
+set -e
+source "$ZETTEL_WORKDIR/globals"
+
+parse_args() {
+    OPTSTRING=":z:t:"
+
+    while getopts ${OPTSTRING} opt; do
+        case ${opt} in
+            z)
+                zettel=$OPTARG
+                ;;
+            t)
+                tag=$OPTARG
+                ;;
+            :)
+                echo "missing args"; exit
+                ;;
+            ?)
+                echo "invalid option."; exit
+                ;;
+        esac
+    done
+
+    case "$zettel" in
+        *\ * )
+            info "name may not contain spaces"; exit
+            ;;
+    esac
+    echo "zettel='$zettel'; tag='$tag'"
+}
+
+tag_insert() {
+    shift && eval "$(parse_args "$@")"
+    if grep -q "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
+        log "tag already present"
+        exit
+    fi
+
+    echo "$tag" >> "$ZETTEL_DATA/$zettel/$TAG_FILENAME"
+}
+
+tag_ls() {
+    shift && eval "$(parse_args "$@")"
+    cat "$ZETTEL_DATA/$zettel/$TAG_FILENAME" || log "error during tag ls"
+}
+
+tag_rm() {
+    shift && eval "$(parse_args "$@")"
+
+    if ! grep -q "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
+        log "tag not present"
+        exit
+    fi
+
+    updated="$(grep -vx "$tag" "$ZETTEL_DATA/$tag/$TAG_FILENAME")"
+    echo "$updated" > "$ZETTEL_DATA/$zettel/$TAG_FILENAME"
+}
+
+case "$1" in
+    insert)
+        tag_insert "$@"
+        ;;
+    ls)
+        tag_ls "$@"
+        ;;
+    rm)
+        tag_rm "$@"
+        ;;
+    mv)
+        echo "not implemented"
+        exit # TODO
+        ;;
+    *)
+        echo "invalid tag command $1"
+        ;;
+esac
