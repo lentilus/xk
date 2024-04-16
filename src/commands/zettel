@@ -26,11 +26,11 @@ parse_args() {
     echo "zettel='$zettel'; path='$path'"
 }
 
-expand_main() (
-        # populate subshell with vars
-        export PREAMBLE="$PREAMBLE_FILE"
-        envsubst < "$MAIN_TEMPLATE"
-    )
+# expand_main() (
+#         # populate subshell with vars
+#         export PREAMBLE="$PREAMBLE_FILE"
+#         envsubst < "$MAIN_TEMPLATE"
+#     )
 
 expand_template() (
         # populate subshell with vars
@@ -44,7 +44,7 @@ copy_files() {
         log "copy preamble"
 
         cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
-        expand_main > "$ZETTEL_DATA/glossary.tex" 
+        # expand_main > "$ZETTEL_DATA/glossary.tex" 
         for f in "$ZETTEL_WORKDIR"/../base/_*; do
             [ -f "$f" ] || continue
             name="$(basename "$f")"
@@ -55,11 +55,11 @@ copy_files() {
 
 zettel_init() {
     if [ -d "$ZETTEL_DATA" ]; then
-        info "reinitializing"
+        log "reinitializing"
         copy_files
         exit
     fi
-    info "initializing new zettelkasten"
+    log "initializing new zettelkasten"
     mkdir "$ZETTEL_DATA" || log "failed to init"
     copy_files
 }

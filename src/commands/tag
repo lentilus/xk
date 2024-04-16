@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-source "$ZETTEL_WORKDIR/globals"
+source "$ZETTEL_WORKDIR/utils"
 
 parse_args() {
     OPTSTRING=":z:t:"
@@ -8,10 +8,10 @@ parse_args() {
     while getopts ${OPTSTRING} opt; do
         case ${opt} in
             z)
-                zettel=$OPTARG
+                zettel="$OPTARG"
                 ;;
             t)
-                tag=$OPTARG
+                tag="$OPTARG"
                 ;;
             :)
                 echo "missing args"; exit
@@ -32,7 +32,7 @@ parse_args() {
 
 tag_insert() {
     shift && eval "$(parse_args "$@")"
-    if grep -q "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
+    if grep -xq "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
         log "tag already present"
         exit
     fi
@@ -48,12 +48,12 @@ tag_ls() {
 tag_rm() {
     shift && eval "$(parse_args "$@")"
 
-    if ! grep -q "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
+    if ! grep -xq "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then
         log "tag not present"
         exit
     fi
 
-    updated="$(grep -vx "$tag" "$ZETTEL_DATA/$tag/$TAG_FILENAME")"
+    updated="$(grep -vx "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME")"
     echo "$updated" > "$ZETTEL_DATA/$zettel/$TAG_FILENAME"
 }
 

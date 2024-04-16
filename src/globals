@@ -6,7 +6,7 @@ export MAIN_TEMPLATE="$ZETTEL_WORKDIR/../tex/main_template.tex"
 
 # targets
 export PREAMBLE_FILE="standalone_preamble.tex"
-export ZETTEL_PREAMBLE="$ZETTEL_WORKDIR/../tex/standalone_preamble.tex"
+# export ZETTEL_PREAMBLE="$ZETTEL_WORKDIR/../tex/standalone_preamble.tex"
 
 # structure
 export ZETTEL_FILENAME=zettel.tex

@@ -24,7 +24,7 @@ parse_args() {
 
     case "$zettel" in
         *\ * )
-            info "name may not contain spaces"; exit
+            log "name may not contain spaces"; exit
             ;;
     esac
     echo "zettel='$zettel'; ref='$ref'"
@@ -32,7 +32,7 @@ parse_args() {
 
 ref_insert() {
     shift && eval "$(parse_args "$@")"
-    if grep -q "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
+    if grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
         log "reference already present"
         exit
     fi
@@ -48,12 +48,12 @@ ref_ls() {
 ref_rm() {
     shift && eval "$(parse_args "$@")"
 
-    if ! grep -q "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
+    if ! grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
         log "reference not present"
         exit
     fi
 
-    updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")"
+    updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")" || updated=""
     echo "$updated" > "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
 }
 
