@@ -2,35 +2,7 @@
 
 set -e
 source "$ZETTEL_WORKDIR/utils"
-
-parse_args() {
-    OPTSTRING=":z:p:"
-
-    while getopts ${OPTSTRING} opt; do
-        case ${opt} in
-            z)
-                zettel=$OPTARG
-                ;;
-            p)
-                path=$OPTARG
-                ;;
-            :)
-                echo "missing args"; exit
-                ;;
-            ?)
-                echo "invalid option."; exit
-                ;;
-        esac
-    done
-
-    echo "zettel='$zettel'; path='$path'"
-}
-
-# expand_main() (
-#         # populate subshell with vars
-#         export PREAMBLE="$PREAMBLE_FILE"
-#         envsubst < "$MAIN_TEMPLATE"
-#     )
+source "$ZETTEL_WORKDIR/commands/ref"
 
 expand_template() (
         # populate subshell with vars
@@ -66,7 +38,7 @@ zettel_init() {
 
 
 zettel_ls() {
-    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d -not -path "$ZETTEL_DATA/.*")"
+    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d -not -name ".*")"
     for zettel in $list
     do
         printf %"s\n" "$(basename "$zettel")"
@@ -95,13 +67,11 @@ zettel_path() {
         basename "$(dirname "$path")"
         exit
     fi
-    exit 1
+    echo "$ZETTEL_DATA"
 }
 
 zettel_insert() {
     eval "$(parse_args "$@")"
-    
-    zettel=${zettel// /_}
 
     if [ -d "$ZETTEL_DATA/$zettel" ]; then
         log "$zettel exists, aborting"
@@ -116,6 +86,24 @@ zettel_insert() {
     echo "$zettel"
 }
 
+zettel_mv() {
+    eval "$(parse_args "$@")"
+    old_title=$zettel
+    new_title=$new_zettel
+
+    log "moving zettel"
+    mv "$ZETTEL_DATA/$old_title" "$ZETTEL_DATA/$new_title" || exit
+
+    log "updating references"
+    for zet in $(zettel_ls); do
+        # if removal of ref was succesfull, update it
+        if ref_rm -z "$zet" -r "$old_title" &> /dev/null; then
+            log "-- updating reference of $zet"
+            ref_insert "-z" "$zet" "-r" "$new_title"
+        fi
+    done
+    echo "$new_title"
+}
 
 case "$1" in
     init)
@@ -132,8 +120,7 @@ case "$1" in
         ;;
     mv)
         shift
-        echo "not implemented"
-        exit #TODO
+        zettel_mv "$@"
         ;;
     path)
         shift

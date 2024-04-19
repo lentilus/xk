@@ -2,36 +2,8 @@
 set -e
 source "$ZETTEL_WORKDIR/utils"
 
-parse_args() {
-    OPTSTRING=":z:r:"
-
-    while getopts ${OPTSTRING} opt; do
-        case ${opt} in
-            z)
-                zettel=$OPTARG
-                ;;
-            r)
-                ref=$OPTARG
-                ;;
-            :)
-                echo "missing args"; exit
-                ;;
-            ?)
-                echo "invalid option."; exit
-                ;;
-        esac
-    done
-
-    case "$zettel" in
-        *\ * )
-            log "name may not contain spaces"; exit
-            ;;
-    esac
-    echo "zettel='$zettel'; ref='$ref'"
-}
-
 ref_insert() {
-    shift && eval "$(parse_args "$@")"
+    eval "$(parse_args "$@")"
     if grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
         log "reference already present"
         exit
@@ -41,30 +13,39 @@ ref_insert() {
 }
 
 ref_ls() {
-    shift && eval "$(parse_args "$@")"
+    eval "$(parse_args "$@")"
     grep -v ^$ "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || log "error during ref ls"
 }
 
 ref_rm() {
-    shift && eval "$(parse_args "$@")"
+    eval "$(parse_args "$@")"
 
     if ! grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
-        log "reference not present"
-        exit
+        log "$ref not referenced by $zettel"
+        return 1
     fi
 
     updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")" || updated=""
     echo "$updated" > "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
+    return 0
 }
+
+# stop here if file is being sourced, not run
+if [ "$0" != "$BASH_SOURCE" ] ; then
+   return
+fi
 
 case "$1" in
     insert)
+        shift
         ref_insert "$@"
         ;;
     ls)
+        shift
         ref_ls "$@"
         ;;
     rm)
+        shift
         ref_rm "$@"
         ;;
     *)

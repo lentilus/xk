@@ -18,7 +18,7 @@ git_init() {
     cd "$ZETTEL_DATA" || exit 
 
     if git_check; then
-       info "exists aborting"
+       log "exists aborting"
        exit 0
     fi
 
@@ -30,31 +30,16 @@ git_cmd() {
     log "cd into zettelkasten"
     cd "$ZETTEL_DATA" || exit 
 
-    
     log "running git" "$@"
-    echo "$(git "$@")"
+    git "$@"
 }
 
 git_publish() {
    git_check || exit 0;
-   tmux confirm -p "publish new zettel [y/N]" "display-message 'publishing...'" || exit 0
    git_cmd add -A
-   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   timestamp=$(date -u +"%Y-%m-%d")
    git_cmd commit -m "publish $timestamp"
    git_cmd push
-}
-
-git_help() {
-    command_name=${0##*/}
-    echo "
-    $command_name
-    Usage: $cli_name $command_name [command]
-    Commands:
-    init      initialize git repo in xettelkasten
-    help      Help
-    *         execute git command on xettelkasten 
-    "
-    exit 1
 }
 
 case "$1" in
@@ -68,6 +53,6 @@ case "$1" in
         git_help
         ;;
     *)
-        git_cmd "$@"
+        shift && git_cmd "$@"
         ;;
 esac

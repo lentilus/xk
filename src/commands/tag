@@ -2,34 +2,6 @@
 set -e
 source "$ZETTEL_WORKDIR/utils"
 
-parse_args() {
-    OPTSTRING=":z:t:"
-
-    while getopts ${OPTSTRING} opt; do
-        case ${opt} in
-            z)
-                zettel="$OPTARG"
-                ;;
-            t)
-                tag="$OPTARG"
-                ;;
-            :)
-                echo "missing args"; exit
-                ;;
-            ?)
-                echo "invalid option."; exit
-                ;;
-        esac
-    done
-
-    case "$zettel" in
-        *\ * )
-            info "name may not contain spaces"; exit
-            ;;
-    esac
-    echo "zettel='$zettel'; tag='$tag'"
-}
-
 tag_insert() {
     shift && eval "$(parse_args "$@")"
     if grep -xq "$tag" "$ZETTEL_DATA/$zettel/$TAG_FILENAME" ; then

@@ -15,3 +15,46 @@ check_kasten() {
     fi
     log "kasten directory: check passed"
 }
+
+parse_args() {
+    OPTSTRING=":z:p:n:r:"
+
+    while getopts ${OPTSTRING} opt; do
+        #
+        # we never have spaces in zettels, tags or referneces
+        # to avoid bugs, so lets just remove them here
+        #
+        OPTARG=${OPTARG// /_}
+        case ${opt} in
+            z)
+                zettel=$OPTARG
+                ;;
+            n)
+                new_zettel=$OPTARG
+                ;;
+            p)
+                path=$OPTARG
+                ;;
+            r)
+                ref=$OPTARG
+                ;;
+            t)
+                tag=$OPTARG
+                ;;
+            :)
+                log "missing args $OPTARG"; exit
+                ;;
+            ?)
+                log "invalid option: $OPTARG"; exit
+                ;;
+        esac
+    done
+
+    echo "zettel='$zettel';\
+          new_zettel='$new_zettel';\
+          path='$path';\
+          ref='$ref';\
+          tag='$tag';"
+}
+
+
