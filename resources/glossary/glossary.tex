@@ -1,0 +1,44 @@
+%
+% This pdf ist not meant to be compiled manually.
+% use the compile script instead!
+%
+
+\documentclass[a4paper]{article}
+\usepackage[subpreambles=false]{standalone}
+\usepackage{import}
+\usepackage{luacode}
+\usepackage{hyperref}
+
+\title{Xettelkasten Glossary}
+\author{Lentilus}
+\date{compiled on \today}
+
+\directlua{glossary = require("glossary")}
+\input{
+    \directlua{tex.sprint(glossary.preamble)}
+}
+
+\excludecomment{question}
+
+\renewenvironment{zettel}[1]{%
+    \begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+    \hypertarget{#1}{\section*{#1}}
+    \def\temp{#1}
+}{%
+    \expandafter\directlua\expandafter{glossary.refs("\temp")}
+    \expandafter\directlua\expandafter{glossary.tags("\temp")}
+    \end{mdframed}
+}%
+
+
+\begin{document}
+\maketitle
+
+\begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+   This pdf you are viewing is a visualization of Lentilus' zettelkasten. To learn more read this \hyperlink{Intro}{zettel}.
+\end{mdframed}
+\newpage
+
+\directlua{glossary.insert_zettel()}
+
+\end{document}

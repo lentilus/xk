@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo script was run directly   
+    exit
+fi
+
+zettel_list="$(xettelkasten ls)"
+dir="$(pwd)"
+
+total="$(wc -w <<< "$zettel_list")"
+
+compile() {
+    zettel_path=$1
+    output=$2
+    latexmk -pdf -f norc -pdflatex="lualatex -interaction=batchmode" -cd $zettel_path -outdir="$output" "zettel.tex" &> /dev/null
+    [ -f "$output/zettel.pdf" ] && return 0
+    echo "no pdf produced for $zettel_path/zettel.tex"
+    return 1
+}
+
+healthy=()
+unhealthy=()
+
+current=1
+for zettel in $zettel_list; do
+    echo "[$current/$total] : $zettel"
+    path="$(xettelkasten path -z "$zettel")"
+    # cd "$path" || exit
+    if compile "$path/zettel.tex" "$ASSET_WORKDIR/../assets/build_cache/$zettel"; then
+        healthy+=("$path")
+    else
+        unhealthy+=("$path")
+    fi
+    current=$(( "$current" + 1 ))
+
+done
+#
+# cd "$dir" || exit
+# rm -rf ./build_cache/healthy && touch ./build_cache/healthy
+# for zettel in "${healthy[@]}"; do
+#     "$CORE" path -z "$zettel" >> ./build_cache/healthy
+# done

@@ -17,10 +17,10 @@ copy_files() {
 
         cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
         # expand_main > "$ZETTEL_DATA/glossary.tex" 
-        for f in "$ZETTEL_WORKDIR"/../base/_*; do
+        for f in "$ZETTEL_WORKDIR"/../resources/base_files/*; do
             [ -f "$f" ] || continue
-            name="$(basename "$f")"
-            new_name="${name#_}"
+            new_name="$(basename "$f")"
+            # new_name="${name#_}"
             cp "$f" "$ZETTEL_DATA/$new_name"
         done
 }

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if ! command -v xettelkasten &> /dev/null
+then
+    echo "xettelkasten-core could not be found."
+    echo "the asset generation depends on it."
+    echo "please add src/xettelkasten to your path."
+    exit 1
+fi
+
+ASSET_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+export ASSET_WORKDIR
+
+export  $(xargs -a "$ASSET_WORKDIR/../config") # word splitting intetional
+
+source "$ASSET_WORKDIR/healthcheck"
+
+HEALTHY_LIST="${healthy[*]}"
+export HEALTHY_LIST
+
+echo healthy list is $HEALTHY_LIST
+
+source "$ASSET_WORKDIR/generators/glossary.sh"
+source "$ASSET_WORKDIR/generators/ankicards"

@@ -53,6 +53,6 @@ case "$1" in
         git_help
         ;;
     *)
-        shift && git_cmd "$@"
+        git_cmd "$@"
         ;;
 esac

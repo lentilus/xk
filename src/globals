@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # templates
-export ZETTEL_TEMPLATE="$ZETTEL_WORKDIR/../tex/template.tex"
-export MAIN_TEMPLATE="$ZETTEL_WORKDIR/../tex/main_template.tex"
+export ZETTEL_TEMPLATE="$ZETTEL_WORKDIR/../resources/template.tex"
+# export MAIN_TEMPLATE="$ZETTEL_WORKDIR/../tex/main_template.tex"
 
 # targets
 export PREAMBLE_FILE="standalone_preamble.tex"
