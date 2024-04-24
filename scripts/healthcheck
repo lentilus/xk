@@ -28,9 +28,9 @@ for zettel in $zettel_list; do
     path="$(xettelkasten path -z "$zettel")"
     # cd "$path" || exit
     if compile "$path/zettel.tex" "$ASSET_WORKDIR/../assets/build_cache/$zettel"; then
-        healthy+=("$path")
+        healthy+=("$zettel")
     else
-        unhealthy+=("$path")
+        unhealthy+=("$zettel")
     fi
     current=$(( "$current" + 1 ))
 

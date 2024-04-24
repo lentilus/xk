@@ -15,10 +15,15 @@ export  $(xargs -a "$ASSET_WORKDIR/../config") # word splitting intetional
 
 source "$ASSET_WORKDIR/healthcheck"
 
-HEALTHY_LIST="${healthy[*]}"
+HEALTHY_NAMES=("${healthy[@]}")
+HEALTHY_LIST=()
+for healthy in "${HEALTHY_NAMES[@]}"; do
+    path=$(xettelkasten path -z "$healthy")
+    HEALTHY_LIST+=("$path")
+done
+
 export HEALTHY_LIST
+export HEALTHY_NAMES
 
-echo healthy list is $HEALTHY_LIST
-
-source "$ASSET_WORKDIR/generators/glossary.sh"
-source "$ASSET_WORKDIR/generators/ankicards"
+# source "$ASSET_WORKDIR/generators/glossary.sh"
+source "$ASSET_WORKDIR/generators/ankicards.sh"

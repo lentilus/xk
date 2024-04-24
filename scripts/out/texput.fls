@@ -1,3 +1,0 @@
-PWD /home/lentilus/git/xettelkasten-core/scripts
-INPUT /var/lib/texmf/web2c/luahbtex/lualatex.fmt
-OUTPUT out/texput.log
