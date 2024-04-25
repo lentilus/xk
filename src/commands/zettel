@@ -6,7 +6,8 @@ source "$ZETTEL_WORKDIR/commands/ref"
 
 expand_template() (
         # populate subshell with vars
-        NAME="$(echo "$1" | tr '_' ' ')"
+        # NAME="$(echo "$1" | tr '_' ' ')"
+        NAME="$1"
         export NAME
         export PREAMBLE="$PREAMBLE_FILE"
         envsubst < "$ZETTEL_TEMPLATE"
@@ -17,7 +18,8 @@ copy_files() {
 
         cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
         # expand_main > "$ZETTEL_DATA/glossary.tex" 
-        for f in "$ZETTEL_WORKDIR"/../resources/base_files/*; do
+        for f in $(find "$ZETTEL_WORKDIR/../resources/base_files/" -mindepth 1 -maxdepth 1); do
+            echo copying $f
             [ -f "$f" ] || continue
             new_name="$(basename "$f")"
             # new_name="${name#_}"
