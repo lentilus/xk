@@ -26,4 +26,4 @@ export HEALTHY_LIST
 export HEALTHY_NAMES
 
 # source "$ASSET_WORKDIR/generators/glossary.sh"
-source "$ASSET_WORKDIR/generators/ankicards.sh"
+source "$ASSET_WORKDIR/generators/import.sh"
