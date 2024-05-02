@@ -9,9 +9,10 @@ end
 debugging("sourced lua")
 
 local xettelkasten_dir = os.getenv("ZETTEL_DATA")
-local healthy_list = os.getenv("HEALTHY_LIST") or ""
+local healthy_list = os.getenv("healthy_string") or ""
 
 debugging("healthy list is: "..healthy_list)
+debugging("xettelkasten dir is: "..xettelkasten_dir)
 
 local sep = "%s"
 local healthy={}

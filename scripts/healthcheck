@@ -24,6 +24,10 @@ unhealthy=()
 
 current=1
 for zettel in $zettel_list; do
+
+    # shorter list for debugging
+    # [[ $current == 5 ]] && break
+    
     echo "[$current/$total] : $zettel"
     path="$(xettelkasten path -z "$zettel")"
     # cd "$path" || exit
