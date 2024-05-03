@@ -38,6 +38,16 @@ I edit and browse my zettelkasten almost exclusively through nvim. For that I us
 - Theorems with Names deserve their own zettel
 - Sketch longer well known proofs instead of polluting a zettel with technical details
 
+I want to make studying as low effort as possible, so I automatically parse and compile flashcards from my zettels that I autoimport in the anki flash card learning-app. This way I never have to manually decide what I want to put in my flashcards - I just wrap everything that seems interesting with a flashcard environment. Everything of the form
+```latex
+\begin{flashcard}
+    \begin{question} What is the defintion of foo? \end{question}
+    Foo is defined as not bar.
+\end{flashcard}
+```
+becomes a flashcard. If no question is supplied the title of the zettel is used. This makes learning with flashcards so much nicer!
+
+Sometimes you might want to share your xettelkasten with others in a format where they can browse your zettels without the xettelksaten utils. For this purpose I have set up a script that uses lualatex to compile a glossary of all zettels present in the zettelkasten in alphabetic order. The links between zettels are inserted as hyperrefs.
 
 ### auto generate Assets
 
