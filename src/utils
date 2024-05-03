@@ -10,7 +10,7 @@ log() {
 
 check_kasten() {
     if ! [[ -d $ZETTEL_DATA ]]; then
-        info "$ZETTEL_DATA does not exist. Please run init"
+        log "$ZETTEL_DATA does not exist. Please run init"
         exit
     fi
     log "kasten directory: check passed"

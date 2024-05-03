@@ -1,4 +1,3 @@
-ZETTEL_DATA="/home/lentilus/.local/xettelkasten"
-LOG_FILE="/tmp/xettelkasten.log"
-NVIM_CMD="nvim"
-NVIM_PIPE="xettelkasten_nvim.pipe"
+ZETTEL_DATA="/path/to/my/zettelkasten"
+LOG_FILE="/tmp/mylogs/xettelkastenlogs"
+ZETTEL_PREAMBLE="/path/to/my/preamble.tex"
