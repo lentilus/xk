@@ -2,57 +2,46 @@ stages:
   - build
   - release
 
-compile-glossary:
+asset-job:
   stage: build
-  image: tianon/latex
+  image: 
+    name: lentilus/xettelkasten:bash
+    pull_policy: always
   script:
-    - mkdir build
-    - latexmk -pdf -f -norc -pdflatex="lualatex -interaction=batchmode" glossary.tex || echo "latexmk failed"
-    - echo "check if pdf was produced"
-    - test -f glossary.pdf || exit
-    - echo GLOSSARY_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
+    - cp -r . /root/zettelkasten
+    - xettelkasten ls
+    - generate_assets &> logs.txt || [[ -f /xettelkasten/assets/glossary/glossary.pdf ]] || failed=1
+    - cat /xettelkasten/assets/glossary/glossary.log >> logs.txt
+    # - if [[ $failed -eq 1 ]]; then; cat logs.txt; exit; fi
+    - echo "pdf successfully created!"
+    - cp /xettelkasten/assets/glossary/glossary.pdf .
+    - echo JOB_ID=$CI_JOB_ID >> JOB_ID.env
   artifacts:
     paths:
       - glossary.pdf
+      - logs.txt
     reports:
-      # export the environment statement so we can access it in the release stage
-      dotenv: CI_JOB_ID.env
-
-# export-anki-flashcards:
-#   stage: build
-#   image: python:latest
-#   script:
-#     - pip install git+https://gitlab.com/lentilus/xettel-to-anki.git
-#     - texanki-apkg zettelkasten.apkg ./standalone_preamble.tex ./ zettelkasten.apkg
-#     - echo ANKI_JOB_ID=$CI_JOB_ID >> CI_JOB_ID.env
-#   artifacts:
-#     paths:
-#       - zettelkasten.apkg
-#     reports:
-#       # export the environment statement so we can access it in the release stage
-#       dotenv: CI_JOB_ID.env
+      dotenv: JOB_ID.env
 
 release-job:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: compile-glossary
-    # - job: export-anki-flashcards
+    - job: asset-job
       artifacts: true
   script:
-    - echo "creating release..."
+    - echo "releasing..."
   release:
     name: 'Release Executables $CI_COMMIT_SHORT_SHA'
     description: 'Created using the release-cli'
-    # tag_name is a memandatory field and can not be an empty string
     tag_name: '$CI_COMMIT_SHORT_SHA'
     assets:
       links:
         - name: 'glossary.pdf'
-          url: '${CI_PROJECT_URL}/-/jobs/${GLOSSARY_JOB_ID}/artifacts/file/glossary.pdf'
+          url: '${CI_PROJECT_URL}/-/jobs/${JOB_ID}/artifacts/file/glossary.pdf'
           filepath: '/export/glossary.pdf'
-        # - name: 'zettelkasten.apkg'
-        #   url: '${CI_PROJECT_URL}/-/jobs/${ANKI_JOB_ID}/artifacts/file/zettelkasten.apkg'
-        #   filepath: '/export/zettelkasten.apkg'
+        - name: 'logs.txt'
+          url: '${CI_PROJECT_URL}/-/jobs/${JOB_ID}/artifacts/file/logs.txt'
+          filepath: '/export/logs.txt'
   only:
-    - master # only execute the release if the pipeline runs for the main branch
+    - master

@@ -25,5 +25,5 @@ done
 export HEALTHY_LIST
 export HEALTHY_NAMES
 
-source "$ASSET_WORKDIR/generators/glossary.sh"
-source "$ASSET_WORKDIR/generators/anki.sh"
+[[ $GEN_GLOSSARY -eq 1 ]] && source "$ASSET_WORKDIR/generators/glossary.sh" &>/dev/null
+[[ $GEN_ANKI -eq 1 ]] && source "$ASSET_WORKDIR/generators/anki.sh"
