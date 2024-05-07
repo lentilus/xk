@@ -40,10 +40,10 @@ zettel_init() {
 
 
 zettel_ls() {
-    list="$(find "$ZETTEL_DATA" -mindepth 1 -maxdepth 1 -type d -not -name ".*")"
+    list="$(find "$ZETTEL_DATA" -mindepth 2 -maxdepth 2 -type f -name "$ZETTEL_FILENAME")"
     for zettel in $list
     do
-        printf %"s\n" "$(basename "$zettel")"
+        printf %"s\n" "$(basename "$(dirname "$zettel" )")"
     done
 }
 
