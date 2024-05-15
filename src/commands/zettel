@@ -41,9 +41,12 @@ zettel_init() {
 
 zettel_ls() {
     list="$(find "$ZETTEL_DATA" -mindepth 2 -maxdepth 2 -type f -name "$ZETTEL_FILENAME")"
-    for zettel in $list
+    for z in $list
     do
-        printf %"s\n" "$(basename "$(dirname "$zettel" )")"
+        # use regex to emulate $(basename $(dirname ...))
+        z_dir=${z%/*}
+        z_final=${z_dir##*/}
+        printf %"s\n" "$z_final"
     done
 }
 
