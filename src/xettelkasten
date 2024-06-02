@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
-ZETTEL_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+ZETTEL_WORKDIR="$(dirname "$(realpath "$0")")"
 export ZETTEL_WORKDIR
-export  $(xargs -a "$ZETTEL_WORKDIR/../config") # word splitting intetional
+export $(xargs -a "$XDG_CONFIG_HOME/xettelkasten/config") # word splitting intetional
 
 source "$ZETTEL_WORKDIR/utils"
 

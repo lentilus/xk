@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# all the installation script does
+# is creating a symlink in .local/bin, as well as
+# copying the default configuration to .config/xettelkasten/config
+
+# symlink xk to entry script 
+ln -s "$(realpath ./src/xettelkasten)" "$HOME/.local/bin/xk"
+
+# copy config
+mkdir -p "$XDG_CONFIG_HOME/xettelkasten"
+cp -n ./config.template "$XDG_CONFIG_HOME/xettelkasten/config" || echo config already present...
+
