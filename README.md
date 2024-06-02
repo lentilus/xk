@@ -26,34 +26,16 @@ Just clone the repo and add src/xettelkasten to your path.
 Pull the docker from dockerhub. It expects your zettelkasten to be mounted to its /root/zettelkasten.
 Use compose or do directly with docker.
 
-## The Core Utility Commands
+## Usage
+> coming soon
 
-## My Workflow
-I edit and browse my zettelkasten almost exclusively through nvim. For that I use the plugin that I wrote specifically for the xettelkasten. I use the xettelkasten to learn mathematics. I fill it with content during the lecture or if I have ideas in between. Generally I found the following quite sensible to determine what to put and what not to put on a zettel:
+## additional scripts
+> coming soon
 
-- A defintion deserves a zettel
-- different defintions for the same thing may be on the same zettel
-- Almost never should there be definitions for different things on the same zettel.
-- lemmas for theorems go on the same zettel as the theorem
-- Theorems with Names deserve their own zettel
-- Sketch longer well known proofs instead of polluting a zettel with technical details
+## TODOS and ideas for Contribution
 
-I want to make studying as low effort as possible, so I automatically parse and compile flashcards from my zettels that I autoimport in the anki flash card learning-app. This way I never have to manually decide what I want to put in my flashcards - I just wrap everything that seems interesting with a flashcard environment. Everything of the form
-```latex
-\begin{flashcard}
-    \begin{question} What is the defintion of foo? \end{question}
-    Foo is defined as not bar.
-\end{flashcard}
-```
-becomes a flashcard. If no question is supplied the title of the zettel is used. This makes learning with flashcards so much nicer!
-
-Sometimes you might want to share your xettelkasten with others in a format where they can browse your zettels without the xettelksaten utils. For this purpose I have set up a script that uses lualatex to compile a glossary of all zettels present in the zettelkasten in alphabetic order. The links between zettels are inserted as hyperrefs.
-
-### auto generate Assets
-
-- Anki flashcards
-- A glossary pdf
-
-## Neovim Plugin
-
-## Gitlab
+- complete readme
+- proper installer to /somthingsensible/bin/something
+- write tests
+- complete asset scripts
+- cronjob for asset generation
