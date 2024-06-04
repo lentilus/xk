@@ -11,7 +11,7 @@ fi
 ASSET_WORKDIR="$(cd "$(dirname "$0")" && pwd)"
 export ASSET_WORKDIR
 
-export  $(xargs -a "$ASSET_WORKDIR/../config") # word splitting intetional
+export  $(xargs -a "$XDG_CONFIG_HOME/xettelkasten/config") # word splitting intetional
 
 source "$ASSET_WORKDIR/healthcheck"
 

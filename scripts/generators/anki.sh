@@ -1,140 +1,191 @@
 #!/bin/bash
-#
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo script was run directly   
     exit
 fi
 
-store_json() { path="$1"
-    filename="$2"
-    json="{\"action\":\"storeMediaFile\",\"params\":{\"filename\":\"$filename\",\"path\":\"$path\"}}"
-    echo "$json"
+COLLECTION="current"
+DECK_NAME="default"
+TEMPDIR="/tmp/converter"
+
+# a nice helper function to make building the request json
+# less of a pain. :)
+query() {
+    action=$1
+    params=$2
+    echo "{
+              \"action\": \"$action\",
+              \"version\": 6,
+              \"params\": { $params }
+          }"
 }
 
-
-import_card() {
-    front_file="$1"
-    back_file="$2"
-
-    front_id="flashtex$(sha1sum "$front_file" |  awk '{print $1}').svg"
-    back_id="flashtex$(sha1sum "$back_file" |  awk '{print $1}').svg"
-
-    save_front="$(store_json "$front_file" "$front_id")"
-    save_back="$(store_json "$back_file" "$back_id")"
-
-    addcard=" { \"action\": \"addNote\",
-                \"params\": {
-                    \"note\": {
-                        \"deckName\": \"Default\",
-                        \"modelName\": \"Basic\",
-                        \"fields\": {
-                            \"Front\": \"<img src=$front_id>\",
-                            \"Back\": \"<img src=$back_id>\" },
-                            \"tags\": []
-                        }
-                    }
-                }"
-
-    requestjson=" { \"action\": \"multi\",
-                    \"params\": {
-                        \"actions\": [
-                            $save_front,
-                            $save_back,
-                            $addcard
-                        ]
-                    },
-                    \"version\": 6}"
-
-    response="$(curl localhost:8765 -X POST -d "$requestjson")"
-    error="$(jq ".result[2].error" <<< "$response")"
-
-    if [[ $error == "null" ]]; then
-        echo "$response", error "$error"
-        echo added new card
-        return
-    fi
-
-    findjson="
-    {
-        \"action\": \"findNotes\",
-        \"version\": 6,
-        \"params\": {
-            \"query\": \"$front_id or $back_id\"
-        }
-    }"
-    findresponse="$(curl localhost:8765 -X POST -d "$findjson")"
-    echo find response: "$findresponse"
-    id="$(jq ".result[0]" <<< "$findresponse")"
-    echo id is $id
-
-    updatejson="
-    {
-        \"action\": \"updateNote\",
-        \"version\": 6,
-        \"params\": {
-            \"note\": {
-                \"id\": $id,
-                \"fields\": {
-                    \"Front\": \"<img src=$front_id>\",
-                    \"Back\": \"<img src=$back_id>\"
-                }
-            }
-        }
-    }"
-    echo "echo updating request: $updatejson"
-    curl localhost:8765 -X POST -d "$updatejson"
+# helper function for anki connect posts
+connect_request() {
+    curl -s localhost:8765 -X POST -d "$1"
 }
 
-echo exporting anki cards...
+# Anki does not allow us to manually assign the id of new flashcards
+# therefor we need to query the collection using the texflash id
+# to retrieve the actual id assigned by anki.
+get_anki_id() {
+    # we could probably just use the notes id in the first place
+    deck=$1
+    tex_id=$2
+    id_request="$(query "findCards" "\"query\": \"deck:$deck id:$tex_id\"" )"
+    response="$(connect_request "$id_request")"
 
-# counter=0
+    card_id="$(echo "$response" | jq ".result[0]")"
+    response="$(connect_request "$(query "cardsToNotes" "\"cards\": [ $card_id ]")")"
+    note_id="$(echo "$response" | jq ".result[0]")"
+    echo "$note_id"
+}
 
+get_hash() {
+    # the json from texflash parse
+    src_json=$1
+    echo "$src_json" | shasum | head -c 10
+}
+
+# We check if the current hash matches the already saved hash.
+# If so, there are no changes and we move on to the next card
+detect_changes() {
+    id=$1 # anki_id
+    json=$2
+    # new_hash="$(echo "$json" | shasum | head -c 10)"
+    new_hash="$(get_hash "$json" )"
+
+    # get last hash from anki
+    hash_request="$(query "cardsInfo" "\"cards\":[$id]")"
+    old_hash="$(connect_request "$hash_request" | jq -r ".result[0] .fields .hash .value")" 
+
+    # if the new hash is equals the old one, there are no changes.
+    [[ "$new_hash" = "$old_hash" ]] && return 1
+    return 0
+}
+
+# store a file in out anki db
+store_file() {
+    path=$1
+    filename=$2
+    json="$(query "storeMediaFile"  "\"filename\":\"$filename\",\"path\":\"$path\"" )"
+    connect_request "$json" &>/dev/null
+}
+
+update_card() {
+    anki_id="$1"
+    hash="$2"
+    front_file="$3"
+    back_file="$4"
+    
+    store_file "$front_file" "front_$hash.svg"
+    store_file "$back_file" "back_$hash.svg"
+
+    front="\"Front\": \"<img src=front_$hash.svg>\""
+    back="\"Back\": \"<img src=back_$hash.svg>\""
+    hash="\"hash\": \"$hash\""
+    # id="\"id\": \"updated id\""
+    update="$(query "updateNoteFields" "\"note\": { \"id\": $anki_id, \"fields\": {$front, $back, $hash}}")"
+    # echo trying update:
+    connect_request "$update" &>/dev/null
+}
+
+new_card() {
+    texflash_id="$1" 
+    hash="$2"
+    front_file="$3"
+    back_file="$4"
+
+    store_file "$front_file" "front_$hash.svg"
+    store_file "$back_file" "back_$hash.svg"
+
+    fields="\"Front\": \"<img src=front_$hash.svg>\",
+            \"Back\": \"<img src=back_$hash.svg>\",
+            \"id\": \"$texflash_id\",
+            \"hash\": \"$hash\""
+
+    new_note="\"deckName\": \"$DECK_NAME\", \"modelName\": \"Basic\", \"fields\": {$fields} "
+    json="$(query "addNote" "\"note\": { $new_note }" | jq)"
+    connect_request "$json"
+}
+
+# MAIN part of the script
+echo extracting flashcards
+
+# laumch anki to make anki_connect available
+flatpak run net.ankiweb.Anki &>/dev/null &
+sleep 3
+
+# iterate over all zettels that compiled successfully in health-check
 for zettel in "${HEALTHY_LIST[@]}"; do
-    tex_file="$zettel/zettel.tex"
-    tex_source="$(cat "$tex_file")"
     name="$(basename "$zettel")"
-    name="${name//_/ }"
-    echo "$name"
-    json="$(flashtexparse "$tex_source" "$name")"
+    tex_source="$(cat "$zettel/zettel.tex")"
+    json="$(flashtexparse "$tex_source")"
     num_cards="$(jq "length"<<< "$json")"
 
-    # [[ $counter -gt 10 ]] && break
-    # counter=$(( "$counter" + 1 ))
-
+    # for each zettel we iterate over all flashcards that were parsed
+    # there may be multiple flashcards in one zettel
     for i in $(seq 0 $(( "$num_cards" -1 ))); do
+        # get corresponding id in anki
+        id="$(jq -r ".[$i] .id"<<< "$json")"
+        
+        # flashcard invalid
+        [ "$id" = 'null' ] && break
+        anki_id="$(get_anki_id "$COLLECTION" "$id")"
+        hash="$(get_hash "$json")"
 
+        if [ "$anki_id" = 'null' ]; then
+            # if there is no card with this id, we need to create it.
+            echo "$name: creating new"
+            srcdir="new_$(uuidgen)"
+            mode="new"
+        else
+            # if the code for the flashcard has not changed,
+            # we move on to the next one
+            if ! detect_changes "$anki_id" "$json"; then
+                echo "$name: nothing to do"
+                break
+            fi
+            
+            # but if it did, we update the flashcard
+            echo "$name: updating"
+            srcdir="$hash"
+            mode="update"
+        fi
 
-        temp_dir="/tmp/converter_$(uuidgen)"
-        mkdir -p "$temp_dir"
-        dir="$(dirname "$tex_file")"
+        tmpdir="$TEMPDIR/$srcdir"
+        zettel_dir="$zettel"
+        mkdir -p "$tmpdir"
 
-        jq -r ".[$i] .question"<<< "$json" > "$dir/front.tex"
-        jq -r ".[$i] .source"<<< "$json" > "$dir/back.tex"
+        # save the source code
+        jq -r ".[$i] .front"<<< "$json" > "$zettel_dir/front.tex"
+        jq -r ".[$i] .back"<<< "$json" > "$zettel_dir/back.tex"
+        
+        # compile both front and back
+        latexmk -pdf -f -norc -lualatex -interaction=batchmode -outdir="$tmpdir" -cd "$zettel_dir/front.tex" &>/dev/null
+        latexmk -pdf -f -norc -lualatex -interaction=batchmode -outdir="$tmpdir" -cd "$zettel_dir/back.tex" &>/dev/null
 
-        latexmk -pdf -f -norc -lualatex -interaction=batchmode -outdir="$temp_dir" -cd "$dir/front.tex" &>/dev/null
-        latexmk -pdf -f -norc -lualatex -interaction=batchmode -outdir="$temp_dir" -cd "$dir/back.tex" &>/dev/null
+        rm -rf "$zettel_dir/front.tex" "$zettel_dir/back.tex"
 
-        rm -rf "$dir/front.tex"
-        rm -rf "$dir/back.tex"
-
-        pdf2svg "$temp_dir/front.pdf" "$temp_dir/front.svg"
-        pdf2svg "$temp_dir/back.pdf" "$temp_dir/back.svg"
-
-
-        inkscape --actions "select-all;fit-canvas-to-selection" --export-overwrite "$temp_dir/front.svg"
-        inkscape --actions "select-all;fit-canvas-to-selection" --export-overwrite "$temp_dir/back.svg"
-
-        prepared_cards+=("$temp_dir")
+        # convert to svg
+        pdf2svg "$tmpdir/front.pdf" "$tmpdir/front.svg" || break # no pdf produced
+        pdf2svg "$tmpdir/back.pdf" "$tmpdir/back.svg" || break
+        
+        # crop to content
+        inkscape --actions "select-all;fit-canvas-to-selection" --export-overwrite "$tmpdir/front.svg"
+        inkscape --actions "select-all;fit-canvas-to-selection" --export-overwrite "$tmpdir/back.svg"
+        
+        if [ "$mode" = "update" ]; then
+            update_card "$anki_id" "$hash" "$tmpdir/front.svg" "$tmpdir/back.svg"
+        elif [ "$mode" = "new" ]; then
+            new_card "$id" "$hash" "$tmpdir/front.svg" "$tmpdir/back.svg"
+        fi
     done
 done
 
-flatpak  run net.ankiweb.Anki &>/dev/null &
-sleep 3
+# clean up cached stuff
+rm -rf "${TEMPDIR:?}/*"
 
-for tmp in "${prepared_cards[@]}"; do
-    import_card "$tmp/front.svg" "$tmp/back.svg"
-    echo ""
-    rm -rf "$tmp"
-done
-
+# quit anki when we are done
 flatpak kill net.ankiweb.Anki
