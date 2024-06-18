@@ -26,6 +26,3 @@ export HEALTHY_LIST
 export HEALTHY_NAMES
 
 [[ $GEN_GLOSSARY -eq 1 ]] && source "$ASSET_WORKDIR/generators/glossary.sh" &>/dev/null
-
-# anki import coming soon
-# [[ $GEN_ANKI -eq 1 ]] && source "$ASSET_WORKDIR/generators/anki.sh"
