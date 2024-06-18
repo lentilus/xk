@@ -1,4 +1,4 @@
-# xk : XeTtelkasten - a LaTeX centric zettelkasten
+# xk - a LaTeX centric zettelkasten
 > an extensible light weight LaTeX centric zettelkasten
 
 ## The Idea
@@ -16,7 +16,7 @@ Make sure you have the basic gnu utils such as xargs etc available (you probably
 Just clone the repo and run the installation script.
 
 ```bash
-git clone https://github.com/lentilus/xettelkasten-core.git
+git clone https://github.com/lentilus/xk.git
 cd xettelkasten-core
 ./install
 ```
@@ -25,11 +25,41 @@ cd xettelkasten-core
 Note: You may need additional dependencies for running the scripts in `./scripts`. These are not part of the core functionality, but provide additional features.
 
 ### Docker
-Pull the docker from dockerhub. It expects your zettelkasten to be mounted to its /root/zettelkasten.
-Use compose or do directly with docker.
+> There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
 
 ## Usage
-> cli usage coming soon
+> make sure you have done the installation steps
+To get started, edit the configuration file found at `~/.config/xettelkasten/config`.
+Most importantly specify a directory where your zettelkasten should live.
+To get going run
+```bash
+xk init
+```
+now you have the following commands at your disposal:
+
+Basics
+```bash
+xk git init               # runs my git command on the zettelkasten
+xk insert -z "foo"        # inserts a zettel with the name foo
+xk ls                     # list all zettels
+xk mv -z "foo" -n "bar"   # rename zettel foo to bar (updates references too)
+xk path -z "bar"          # get path of zettel "bar"
+xk rm -z "bar"            # remove "bar"
+```
+
+References
+```bash
+xk ref insert -z "foo" -r "bar" # let foo reference bar
+xk ref ls -z "foo"              # list references from foo
+xk ref rm -z "foo" -r "bar"     # remove reference to bar
+```
+
+Tags
+```bash
+xk tag insert -z "foo" -r "bar" # add tag bar to "foo"
+xk tag ls -z "foo"              # list tags of "foo"
+xk tag rm -z "foo" -r "bar"     # remove tag "bar" from "foo"
+```
 
 If you are a neovim user I recommend the plugin `xettelkasten.nvim`, coming to Github soon but currently hosetet at gitlab.com/lentilus/xettelkasten.nvim.git.
 
@@ -37,7 +67,6 @@ If you are a neovim user I recommend the plugin `xettelkasten.nvim`, coming to G
 > coming soon
 
 ## TODOS and ideas for Contribution
-
 - man entry
 - help menu
 - make xk run in alpine contianers
