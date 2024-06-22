@@ -24,8 +24,13 @@ cd xettelkasten-core
 
 Note: You may need additional dependencies for running the scripts in `./scripts`. These are not part of the core functionality, but provide additional features.
 
+## Demo
+
+![usage demo](resources/demo.mkv)
+
 ### Docker
 > There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
+
 
 ## Usage
 > make sure you have done the installation steps
