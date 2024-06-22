@@ -1,0 +1,15 @@
+\title{Glossary}
+\author{Lentilus}
+\date{\today}
+
+\renewcommand*\contentsname{Index}
+\setcounter{secnumdepth}{0}
+
+\excludecomment{question}
+
+\renewenvironment{zettel}[1]{%
+	\begin{mdframed}[nobreak=true, topline=false,bottomline=false, rightline=false]
+		\hypertarget{#1}{\section{#1}}
+		}{%
+	\end{mdframed}
+}%

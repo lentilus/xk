@@ -1,0 +1,19 @@
+\documentclass[a4paper]{article}
+\usepackage[subpreambles=false]{standalone}
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{import}
+\usepackage{luacode}
+\usepackage{hyperref}
+
+\directlua{g = require("glossary")}
+\directlua{g.preamble()}
+
+% some overwrites
+\input{preamble.tex}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\directlua{g.all()}
+\end{document}

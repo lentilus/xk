@@ -32,6 +32,11 @@ case "$1" in
         check_kasten
         "$CMD/git" "$@"
         ;;
+    script)
+        shift
+        check_kasten
+        "$CMD/script" "$@"
+        ;;
     *) # zettel
         [[ $2 == "init" ]] || check_kasten
         "$CMD/zettel" "$@"

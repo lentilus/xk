@@ -37,3 +37,6 @@ ZETTEL_PREAMBLE="$HOME/git/preamble/preamble.tex"
 
 # the above options will be overwritten
 # if set in .config/xk/config
+
+# for builtin userscripts
+SKIP_HEALTHCHECK=0
