@@ -26,7 +26,7 @@ Note: You may need additional dependencies for running the scripts in `./scripts
 
 ## Demo
 
-![usage demo](resources/demo.mkv)
+![usage demo](resources/demo.mp4)
 
 ### Docker
 > There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
