@@ -10,6 +10,11 @@ For this reason there are tons of apps (Obsidian, Zettlr, Logseq, etc) implement
 
 xk is light weight, extensible, and could be used with any plain text file format. (It just happes to be LaTeX for me - hence the name XeTtelkasten : TeX-Zettelkasen)
 
+
+## Demo (with xettelkasten.nvim)
+https://github.com/lentilus/xk/assets/170900031/8bedf9c5-04ba-4ffa-b534-0004cb29456f
+This video shows me creating two zettels and referencing one to anoter.
+
 ## Installation
 
 Make sure you have the basic gnu utils such as xargs etc available (you probably have).
@@ -23,11 +28,6 @@ cd xettelkasten-core
 > The install script just creates a symlink at `$HOME/.local/bin/xk`.
 
 Note: You may need additional dependencies for running the scripts in `./scripts`. These are not part of the core functionality, but provide additional features.
-
-## Demo
-
-https://github.com/lentilus/xk/assets/170900031/8bedf9c5-04ba-4ffa-b534-0004cb29456f
-
 
 ### Docker
 > There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
