@@ -12,7 +12,10 @@ xk is light weight, extensible, and could be used with any plain text file forma
 
 
 ## Demo (with xettelkasten.nvim)
+
 https://github.com/lentilus/xk/assets/170900031/8bedf9c5-04ba-4ffa-b534-0004cb29456f
+
+
 This video shows me creating two zettels and referencing one to anoter.
 
 ## Installation
