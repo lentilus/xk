@@ -26,7 +26,8 @@ Note: You may need additional dependencies for running the scripts in `./scripts
 
 ## Demo
 
-![usage demo](resources/demo.mp4)
+https://github.com/lentilus/xk/assets/170900031/8bedf9c5-04ba-4ffa-b534-0004cb29456f
+
 
 ### Docker
 > There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
