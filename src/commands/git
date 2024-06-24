@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-source "$ZETTEL_WORKDIR/utils"
 
 git_check() {
     if [ -d "$ZETTEL_DATA/.git" ]; then

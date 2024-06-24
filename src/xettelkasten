@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
-set -e
-ZETTEL_WORKDIR="$(dirname "$(realpath "$0")")"
-export ZETTEL_WORKDIR
-export $(xargs -a "$XDG_CONFIG_HOME/xettelkasten/config") # word splitting intetional
+set -e # exit on any non-0 exiting command
 
+# this env var is used to reference scripts
+# relative to the installation path of xk
+export ZETTEL_WORKDIR
+ZETTEL_WORKDIR="$(dirname "$(realpath "$0")")"
+
+# source global options such as configuration etc
+set -o allexport # export all variables after this
+source "$ZETTEL_WORKDIR/default_config"
+source "$XDG_CONFIG_HOME/xk/config"
 source "$ZETTEL_WORKDIR/utils"
+set +o allexport
 
 CMD=$ZETTEL_WORKDIR/commands
 
@@ -24,6 +31,11 @@ case "$1" in
         shift
         check_kasten
         "$CMD/git" "$@"
+        ;;
+    script)
+        shift
+        check_kasten
+        "$CMD/script" "$@"
         ;;
     *) # zettel
         [[ $2 == "init" ]] || check_kasten

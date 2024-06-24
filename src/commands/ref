@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source "$ZETTEL_WORKDIR/utils"
 
 ref_insert() {
     eval "$(parse_args "$@")"

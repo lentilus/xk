@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source "$ZETTEL_WORKDIR/utils"
 
 tag_insert() {
     shift && eval "$(parse_args "$@")"
