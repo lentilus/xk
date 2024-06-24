@@ -10,7 +10,7 @@ ZETTEL_WORKDIR="$(dirname "$(realpath "$0")")"
 # source global options such as configuration etc
 set -o allexport # export all variables after this
 source "$ZETTEL_WORKDIR/default_config"
-source "${XDG_CONFIG_HOME:-$HOME/.config}/xk/config"
+source "$XDG_CONFIG_HOME/xk/config"
 source "$ZETTEL_WORKDIR/utils"
 set +o allexport
 

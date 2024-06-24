@@ -1,3 +1,3 @@
-ZETTEL_DATA="/path/to/my/zettelkasten"
-LOG_FILE="/tmp/mylogs/xettelkastenlogs"
-ZETTEL_PREAMBLE="/path/to/my/preamble.tex"
+ZETTEL_DATA="$HOME/.local/xettelkasten/my-zettel-kasten"
+LOG_FILE="/tmp/xettelkasten_test.log"
+ZETTEL_PREAMBLE="$HOME/git/preamble/preamble.tex"
