@@ -87,10 +87,10 @@ The image will soon be available on dockerhub.
 
 ## TODOS and ideas for Contribution
 
-[x] make xk run in alpine contianers
-[x] rewrite user-scripts
-[ ] complete readme
-[ ] cronjob for asset generation
-[ ] write tests
-[ ] man entry
-[ ] help menu
+- [x] make xk run in alpine contianers
+- [x] rewrite user-scripts
+- [ ] complete readme
+- [ ] cronjob for asset generation
+- [ ] write tests
+- [ ] man entry
+- [ ] help menu
