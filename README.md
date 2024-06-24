@@ -32,9 +32,6 @@ cd xettelkasten-core
 
 Note: You may need additional dependencies for running the scripts in `./scripts`. These are not part of the core functionality, but provide additional features.
 
-### Docker
-> There is an outdated image on dockerhub. I will update it in the future when xk runs on alpine.
-
 
 ## Usage
 > make sure you have done the installation steps
@@ -72,14 +69,28 @@ xk tag rm -z "foo" -r "bar"     # remove tag "bar" from "foo"
 
 If you are a neovim user I recommend the plugin `xettelkasten.nvim`, coming to Github soon but currently hosetet at gitlab.com/lentilus/xettelkasten.nvim.git.
 
-## additional scripts
+## Docker
+The Dockerfile builds an image based on a texlive-full (alpine) image to enable in container compilation.
+
+You can build the docker container yourself and use it to run xk commands on your local zettelkasten.
+
+```bash
+docker build . --progress=plain -t lentilus/xkfoo
+docker run -v /my/zettel/kasten:/data lentilus/xk ls
+```
+> Note that the image will not contain all dependencies for all commands / userscripts
+
+The image will soon be available on dockerhub.
+
+## Userscripts
 > coming soon
 
 ## TODOS and ideas for Contribution
-- man entry
-- help menu
-- make xk run in alpine contianers
-- complete readme
-- write tests
-- complete asset scripts
-- cronjob for asset generation
+
+[x] make xk run in alpine contianers
+[x] rewrite user-scripts
+[ ] complete readme
+[ ] cronjob for asset generation
+[ ] write tests
+[ ] man entry
+[ ] help menu
