@@ -11,16 +11,14 @@ expand_template() (
 
 copy_files() {
         log "copy preamble"
-
+        echo "copying preamble..."
         cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
-        # expand_main > "$ZETTEL_DATA/glossary.tex" 
-        for f in $(find "$ZETTEL_WORKDIR/../resources/base_files/" -mindepth 1 -maxdepth 1); do
-            echo copying $f
-            [ -f "$f" ] || continue
-            new_name="$(basename "$f")"
-            # new_name="${name#_}"
-            cp "$f" "$ZETTEL_DATA/$new_name"
-        done
+        echo "copying base files..."
+
+        # copy both .files and files
+        find "$ZETTEL_WORKDIR/../resources/base_files/" \
+            -mindepth 1 -maxdepth 1 -name "*" \
+            -exec cp -r '{}' "$ZETTEL_DATA" \;
 }
 
 zettel_init() {
@@ -111,6 +109,8 @@ case "$1" in
         shift
         zettel_init
         ;;
+    zet)
+        ;&
     ls)
         shift
         zettel_ls

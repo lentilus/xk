@@ -33,7 +33,7 @@ cd xettelkasten-core
 Note: You may need additional dependencies for running the scripts in `./scripts`. These are not part of the core functionality, but provide additional features.
 
 
-## Usage
+## API
 > make sure you have done the installation steps
 To get started, edit the configuration file found at `~/.config/xettelkasten/config`.
 Most importantly specify a directory where your zettelkasten should live.
@@ -41,7 +41,7 @@ To get going run
 ```bash
 xk init
 ```
-now you have the following commands at your disposal:
+now you have a cli for interacting with your zettelkasten at your disposal:
 
 Basics
 ```bash
