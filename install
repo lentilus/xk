@@ -9,6 +9,7 @@ echo "linking src/xettelkasten to /usr/local/bin/xk"
 ln -s "$(realpath ./src/xettelkasten)" "/usr/local/bin/xk"
 
 # copy config
-echo "copying default config to $XDG_CONFIG_HOME/xk/config"
-mkdir -p "$XDG_CONFIG_HOME/xk"
-cp -n ./config.template "$XDG_CONFIG_HOME/xk/config" || echo config already present...
+home="${XDG_CONFIG_HOME:-${HOME}/.config}"
+echo "copying default config to $home/xk/config"
+mkdir -p "$home/xk"
+cp -n ./config.template "$home/xk/config" || echo config already present...
