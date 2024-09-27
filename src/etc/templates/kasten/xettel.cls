@@ -1,19 +1,11 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{xettel}[2024/09/09 XK Zettel Class]
 
-% \RequirePackage{mdframed}
-
 \LoadClass[class=article, crop=false]{standalone}
 
-\RequirePackage{../testingpreamble}
-% \RequirePackage{currfile}
+\RequirePackage{../preamble}
 
-\AtBeginDocument {
-	\begin{mdframed}
-		}
-
-		\AtEndDocument {
-	\end{mdframed}
-}
+\AtBeginDocument{\begin{zettel} }
+		\AtEndDocument{\end{zettel}}
 
 \endinput

@@ -1,4 +1,4 @@
-\ProvidesPackage{testingpreamble}[2024/09/09 Custom Preamble]
+\ProvidesPackage{preamble}[2024/09/09 Custom Preamble]
 
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
@@ -116,7 +116,7 @@
 }
 
 \newenvironment{question}{\par\itshape}{\par}
-\newenvironment{zettel}[1]
+\newenvironment{zettel}
 {
 	\begin{mdframed}[%
 			nobreak=false,%
@@ -124,7 +124,6 @@
 			bottomline=false,%
 			rightline=false%
 		]
-		\section*{#1}
 		}
 		{
 	\end{mdframed}
