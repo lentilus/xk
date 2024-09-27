@@ -1,24 +1,19 @@
 #!/bin/bash
 
 expand_template() (
-        # populate subshell with vars
-        # NAME="$(echo "$1" | tr '_' ' ')"
-        NAME="$1"
-        export NAME
-        export PREAMBLE="$PREAMBLE_FILE"
-        envsubst < "$ZETTEL_TEMPLATE"
-    )
+    # populate subshell with vars
+    NAME="${1//_/ }"
+    export NAME
+    export PREAMBLE="$PREAMBLE_FILE"
+    envsubst < "$ZETTEL_TEMPLATE"
+)
 
 copy_files() {
-        log "copy preamble"
-        echo "copying preamble..."
-        cp  "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
-        echo "copying base files..."
-
-        # copy both .files and files
-        find "$ZETTEL_WORKDIR/../resources/base_files/" \
-            -mindepth 1 -maxdepth 1 -name "*" \
-            -exec cp -r '{}' "$ZETTEL_DATA" \;
+    log "copy preamble"
+    echo "copying preamble..."
+    cp "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
+    cp -r "$ETC_DIR/templates/kasten/." "$ZETTEL_DATA"
+    echo "copying base files..."
 }
 
 zettel_init() {
@@ -37,7 +32,7 @@ zettel_ls() {
     list="$(find "$ZETTEL_DATA" -mindepth 2 -maxdepth 2 -type f -name "$ZETTEL_FILENAME")"
     for z in $list
     do
-        # use regex to emulate $(basename $(dirname ...))
+        # use faster regex to emulate $(basename $(dirname ...))
         z_dir=${z%/*}
         z_final=${z_dir##*/}
         printf %"s\n" "$z_final"
@@ -74,7 +69,8 @@ zettel_insert() {
 
     if [ -d "$ZETTEL_DATA/$zettel" ]; then
         log "$zettel exists, aborting"
-        exit
+        echo "$zettel"
+        exit 1
     fi
 
     mkdir "$ZETTEL_DATA/$zettel" || exit

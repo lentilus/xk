@@ -6,7 +6,7 @@
 # shellcheck disable=SC2034
 
 # template
-ZETTEL_TEMPLATE="$ZETTEL_WORKDIR/../resources/template.tex"
+ZETTEL_TEMPLATE="$ETC_DIR/templates/zettel.tex"
 
 # the preamble relative to the zettel-kastens root (ZETTEL_DATA)
 PREAMBLE_FILE="standalone_preamble.tex"

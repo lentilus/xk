@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This is just a little wrapper for
+# running user scripts trough
+# xk script myscript
+
+# if a userscript is defined both by the user
+# and builtin, we prioritise the one by the user
+
+# xk binary, user defined, pre defined
+export PATH="$BIN_DIR:$CONFIG_DIR/userscripts:$SHARE_DIR/userscripts/:$PATH"
+
+exec "$@"
