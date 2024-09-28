@@ -10,10 +10,10 @@ expand_template() (
 
 copy_files() {
     log "copy preamble"
-    echo "copying preamble..."
-    cp "$ZETTEL_PREAMBLE" "$ZETTEL_DATA/$PREAMBLE_FILE"
-    cp -r "$ETC_DIR/templates/kasten/." "$ZETTEL_DATA"
-    echo "copying base files..."
+    echo "copying..."
+    
+    # copy without copying permissions
+    cp --no-preserve=mode -r "$ETC_DIR/templates/kasten/." "$ZETTEL_DATA"
 }
 
 zettel_init() {
