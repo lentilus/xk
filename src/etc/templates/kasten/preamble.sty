@@ -1,5 +1,8 @@
 \ProvidesPackage{preamble}[2024/09/09 Custom Preamble]
 
+% for including other zettels
+\usepackage[subpreambles=false]{standalone}
+
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
@@ -12,16 +15,18 @@
 \usepackage{etoolbox}
 \usepackage{currfile}
 \usepackage{subfiles}
-\usepackage{xparse}
 \usepackage{currfile}
-\usepackage[linewidth=1pt]{mdframed}
 
-\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+\usepackage{xparse}
+\usepackage{xstring}
+\usepackage{xifthen}
 
 \usepackage{import}
-\usepackage{xifthen}
 \usepackage{pdfpages}
 \usepackage{transparent}
+
+\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+\usepackage[linewidth=1pt]{mdframed}
 
 \declaretheoremstyle[notebraces={[}{]},headpunct=\newline,]{custom}
 \theoremstyle{custom}
@@ -109,24 +114,34 @@
 			bottomline=true,%
 			leftline=false%
 		]
-		#2 \hfill \itshape #1\\
+		#2 \hfill \texttt{#1}\\
 		}
 		{
 	\end{mdframed}
 }
 
 \newenvironment{question}{\par\itshape}{\par}
-\newenvironment{zettel}
-{
-	\begin{mdframed}[%
-			nobreak=false,%
-			topline=false,%
-			bottomline=false,%
-			rightline=false%
-		]
-		}
-		{
-	\end{mdframed}
+
+\newenvironment{zettel}{}{}
+
+\newcounter{zreflevel}
+\setcounter{zreflevel}{0}
+
+\newcommand{\zref}[2][default]{%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#2}{_}{\space}}} }%
+	\ifthenelse{\equal{#1}{show}}{%
+		\stepcounter{zreflevel}%
+		\begin{mdframed}%
+			\ifthenelse{\value{zreflevel} > 3}{%
+				\tempname \textit{-- stopped nesting}%
+			}{%
+				\tempname \input{../#2/zettel.tex}%
+			}%
+		\end{mdframed}%
+		\setcounter{zreflevel}{\value{zreflevel} - 1}%
+	}{%
+		\tempname%
+	}%
 }
 
 \newcommand{\inkfig}[1]{
