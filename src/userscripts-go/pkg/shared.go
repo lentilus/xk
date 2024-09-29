@@ -3,9 +3,10 @@ package pkg
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
-func Xk(command string, options map[string]string) error {
+func Xk(command string, options map[string]string) ([]string, error) {
 	cmd := exec.Command("xk", command)
 
 	var args []string
@@ -16,12 +17,11 @@ func Xk(command string, options map[string]string) error {
 
 	cmd.Args = append(cmd.Args, args...)
 
-	output, err := cmd.CombinedOutput()
+	output, err := cmd.Output()
 	if err != nil {
-		return fmt.Errorf("error executing script: %v, output: %s", err, output)
+		return []string{}, fmt.Errorf("error executing script: %v, output: %s", err, output)
 	}
-
 	fmt.Println(string(output))
 
-	return nil
+	return strings.Split(string(output), "\n"), nil
 }
