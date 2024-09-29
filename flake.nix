@@ -15,7 +15,7 @@
 
         src = ./.;
 
-        buildInputs = [ pkgs.bash ];
+        buildInputs = [ pkgs.bash pkgs.go ];
 
         installPhase = ''
           mkdir -p $out/bin
@@ -30,6 +30,12 @@
 
           # bash userscripts
           cp -r src/userscripts-bash/* $out/share/xk/userscripts
+
+          # go usercripts
+          find src/userscripts-go/cmd -mindepth 2 -maxdepth 2 -name main.go | while read main_file; do
+             script_name=$(basename $(dirname $main_file))
+             go build -o $out/share/xk/userscripts/$script_name "./$(dirname $main_file)"
+          done
         '';
 
         meta = with pkgs.lib; {
