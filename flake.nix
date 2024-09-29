@@ -23,15 +23,13 @@
           mkdir -p $out/etc/xk
           mkdir -p $out/share/xk/userscripts
 
-          # install core
+          # core
           cp src/bin/xettelkasten $out/bin/xk
           cp src/lib/* $out/lib/xk/
           cp -r src/etc/* $out/etc/xk/
 
-          # install bash userscripts (copy but remove .sh)
-          for file in src/userscripts/*.sh; do
-              cp "$file" "$out/share/xk/userscripts/$(basename "$file" .sh)"  # Copy and remove the .sh extension
-          done
+          # bash userscripts
+          cp -r src/userscripts-bash/* $out/share/xk/userscripts
         '';
 
         meta = with pkgs.lib; {
