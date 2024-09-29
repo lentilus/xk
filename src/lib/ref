@@ -3,26 +3,21 @@ set -e
 
 ref_insert() {
     eval "$(parse_args "$@")"
-    if grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
-        log "reference already present"
-        exit
-    fi
+
+    [[ -d "$ZETTEL_DATA/$ref" ]] || abort "the zettel $ref does not exist."
+    grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" && abort "Reference $ref already present."
 
     echo "$ref" >> "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
 }
 
 ref_ls() {
     eval "$(parse_args "$@")"
-    grep -v ^$ "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || log "error during ref ls"
+    grep -v ^$ "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || abort "failed getting refs"
 }
 
 ref_rm() {
     eval "$(parse_args "$@")"
-
-    if ! grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" ; then
-        log "$ref not referenced by $zettel"
-        return 1
-    fi
+    grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || abort "No reference named $ref."
 
     updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")" || updated=""
     echo "$updated" > "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
@@ -30,9 +25,7 @@ ref_rm() {
 }
 
 # stop here if file is being sourced, not run
-if [ "$0" != "$BASH_SOURCE" ] ; then
-   return
-fi
+[[ "$0" != "$BASH_SOURCE" ]] && return
 
 case "$1" in
     insert)

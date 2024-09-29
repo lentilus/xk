@@ -7,39 +7,31 @@ git_check() {
         log ".git directory exists"
         return 0
     else
-        log ".git direcory does not exist."
-        return 1
+        abort ".git directory does not exist."
     fi
 }
 
 git_init() {
-    log "cd into zettelkasten"
-    cd "$ZETTEL_DATA" || exit 
-
-    if git_check; then
-       log "exists aborting"
-       exit 0
-    fi
-
     log "running git init"
-    git init
+    git init || abort "git init failed"
 }
 
 git_cmd() {
-    log "cd into zettelkasten"
-    cd "$ZETTEL_DATA" || exit 
-
+    git_check
     log "running git" "$@"
-    git "$@"
+    git "$@" || abort "Error running git $*"
 }
 
 git_publish() {
-   git_check || exit 0;
    git_cmd add -A
    timestamp=$(date -u +"%Y-%m-%d")
    git_cmd commit -m "publish $timestamp"
    git_cmd push
 }
+
+# stop here if file is being sourced, not run
+[[ "$0" != "$BASH_SOURCE" ]] && return
+cd "$ZETTEL_DATA" || abort "failed to cd to $ZETTEL_DATA"
 
 case "$1" in
     init)

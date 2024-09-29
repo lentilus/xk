@@ -18,31 +18,26 @@ source "$LIB_DIR/utils"
 
 set +o allexport
 
-# CMD=$ZETTEL_WORKDIR/commands
+[[ $1 == "init" ]] || check_kasten
 
 case "$1" in
     ref)
         shift
-        check_kasten
         "$LIB_DIR/ref" "$@"
         ;;
     tag)
         shift
-        check_kasten
         "$LIB_DIR/tag" "$@"
         ;;
     git)
         shift
-        check_kasten
         "$LIB_DIR/git" "$@"
         ;;
     script)
         shift
-        check_kasten
         "$LIB_DIR/script" "$@"
         ;;
-    *) # zettel
-        [[ $1 == "init" ]] ||  check_kasten
+    *)
         "$LIB_DIR/zettel" "$@"
         ;;
 esac

@@ -28,6 +28,9 @@ tag_rm() {
     echo "$updated" > "$ZETTEL_DATA/$zettel/$TAG_FILENAME"
 }
 
+# stop here if file is being sourced, not run
+[[ "$0" != "$BASH_SOURCE" ]] && return
+
 case "$1" in
     insert)
         tag_insert "$@"

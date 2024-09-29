@@ -5,7 +5,7 @@ expand_template() (
     NAME="${1//_/ }"
     export NAME
     export PREAMBLE="$PREAMBLE_FILE"
-    envsubst < "$ZETTEL_TEMPLATE"
+    envsubst < "$ZETTEL_TEMPLATE" || abort "Failed to expand template"
 )
 
 copy_files() {
@@ -13,7 +13,7 @@ copy_files() {
     echo "copying..."
     
     # copy without copying permissions
-    cp --no-preserve=mode -r "$ETC_DIR/templates/kasten/." "$ZETTEL_DATA"
+    cp --no-preserve=mode -r "$ETC_DIR/templates/kasten/." "$ZETTEL_DATA" || abort "Failed to copy files"
 }
 
 zettel_init() {
@@ -23,13 +23,12 @@ zettel_init() {
         exit
     fi
     log "initializing new zettelkasten"
-    mkdir "$ZETTEL_DATA" || log "failed to init"
+    mkdir "$ZETTEL_DATA" || abort "Failed to initialize zettelkasten"
     copy_files
 }
 
-
 zettel_ls() {
-    list="$(find "$ZETTEL_DATA" -mindepth 2 -maxdepth 2 -type f -name "$ZETTEL_FILENAME")"
+    list="$(find "$ZETTEL_DATA" -mindepth 2 -maxdepth 2 -type f -name "$ZETTEL_FILENAME")" || abort "Failed to list zettels"
     for z in $list
     do
         # use faster regex to emulate $(basename $(dirname ...))
@@ -41,22 +40,22 @@ zettel_ls() {
 
 zettel_rm() {
     eval "$(parse_args "$@")"
-    rm -r "$ZETTEL_DATA/${zettel:?}" || log "error removing zettel"
+    rm -r "$ZETTEL_DATA/${zettel:?}" || abort "Error removing zettel: $zettel"
 }
 
 zettel_path() {
     eval "$(parse_args "$@")"
 
     if [[ -n $zettel ]]; then
-        [[ -d  "$ZETTEL_DATA/$zettel" ]] || exit 1
+        [[ -d  "$ZETTEL_DATA/$zettel" ]] || abort "Zettel directory does not exist: $zettel"
         echo "$ZETTEL_DATA/$zettel"
         exit
     elif [[ -n $path ]]; then 
         supplied="$(dirname "$(dirname "$path")")"
 
         # test validity of path
-        [[ "$ZETTEL_DATA" -ef "$supplied" ]] || exit 1
-        [[ -f $path ]] || exit 1
+        [[ "$ZETTEL_DATA" -ef "$supplied" ]] || abort "Invalid supplied path"
+        [[ -f $path ]] || abort "Path does not exist: $path"
         
         basename "$(dirname "$path")"
         exit
@@ -67,16 +66,12 @@ zettel_path() {
 zettel_insert() {
     eval "$(parse_args "$@")"
 
-    if [ -d "$ZETTEL_DATA/$zettel" ]; then
-        log "$zettel exists, aborting"
-        echo "$zettel"
-        exit 1
-    fi
+    [[ -d "$ZETTEL_DATA/$zettel" ]] && abort "$zettel already exists, aborting"
 
-    mkdir "$ZETTEL_DATA/$zettel" || exit
-    expand_template "$zettel" > "$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME"
-    touch "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || exit
-    touch "$ZETTEL_DATA/$zettel/$TAG_FILENAME" || exit
+    mkdir "$ZETTEL_DATA/$zettel" || abort "Failed to create zettel directory: $zettel"
+    expand_template "$zettel" > "$ZETTEL_DATA/$zettel/$ZETTEL_FILENAME" || abort "Failed to create zettel file: $zettel"
+    touch "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || abort "Failed to create reference file: $zettel"
+    touch "$ZETTEL_DATA/$zettel/$TAG_FILENAME" || abort "Failed to create tag file: $zettel"
     log "created $zettel"
     echo "$zettel"
 }
@@ -87,18 +82,21 @@ zettel_mv() {
     new_title=$new_zettel
 
     log "moving zettel"
-    mv "$ZETTEL_DATA/$old_title" "$ZETTEL_DATA/$new_title" || exit
+    mv "$ZETTEL_DATA/$old_title" "$ZETTEL_DATA/$new_title" || abort "Failed to move zettel from $old_title to $new_title"
 
     log "updating references"
     for zet in $(zettel_ls); do
-        # if removal of ref was succesfull, update it
+        # if removal of ref was successful, update it
         if ref_rm -z "$zet" -r "$old_title" &> /dev/null; then
             log "-- updating reference of $zet"
-            ref_insert "-z" "$zet" "-r" "$new_title"
+            ref_insert "-z" "$zet" "-r" "$new_title" || abort "Failed to update reference for $zet"
         fi
     done
     echo "$new_title"
 }
+
+# stop here if file is being sourced, not run
+[[ "$0" != "$BASH_SOURCE" ]] && return
 
 case "$1" in
     init)
@@ -128,6 +126,6 @@ case "$1" in
         zettel_insert "$@"
         ;;
     *)
-        echo "invalid top level command $1."
+        abort "Invalid top-level command: $1"
         ;;
 esac
