@@ -21,7 +21,6 @@ func Xk(command string, options map[string]string) ([]string, error) {
 	if err != nil {
 		return []string{}, fmt.Errorf("error executing script: %v, output: %s", err, output)
 	}
-	fmt.Println(string(output))
 
 	return strings.Split(string(output), "\n"), nil
 }
