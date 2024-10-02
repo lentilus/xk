@@ -132,13 +132,13 @@
 \newcounter{zinclevel}
 \setcounter{zinclevel}{0}
 \newcommand{\zinc}[1]{%
-	\def\tempname{\texttt{\underline{\StrSubstitute{#2}{_}{\space}}} }%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
 	\stepcounter{zinclevel}%
 	\begin{mdframed}%
 		\ifthenelse{\value{zreflevel} > 3}{%
 			\tempname \textit{-- stopped nesting}%
 		}{%
-			\tempname \input{../#2/zettel.tex}%
+			\tempname \input{../#1/zettel.tex}%
 		}%
 	\end{mdframed}%
 	\setcounter{zinclevel}{\value{zinclevel} - 1}%
