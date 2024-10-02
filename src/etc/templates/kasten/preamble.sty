@@ -124,24 +124,24 @@
 
 \newenvironment{zettel}{}{}
 
-\newcounter{zreflevel}
-\setcounter{zreflevel}{0}
+\newcommand{\zref}[1]{%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
+	\tempname%
+}%
 
-\newcommand{\zref}[2][default]{%
+\newcounter{zinclevel}
+\setcounter{zinclevel}{0}
+\newcommand{\zinc}[1]{%
 	\def\tempname{\texttt{\underline{\StrSubstitute{#2}{_}{\space}}} }%
-	\ifthenelse{\equal{#1}{show}}{%
-		\stepcounter{zreflevel}%
-		\begin{mdframed}%
-			\ifthenelse{\value{zreflevel} > 3}{%
-				\tempname \textit{-- stopped nesting}%
-			}{%
-				\tempname \input{../#2/zettel.tex}%
-			}%
-		\end{mdframed}%
-		\setcounter{zreflevel}{\value{zreflevel} - 1}%
-	}{%
-		\tempname%
-	}%
+	\stepcounter{zinclevel}%
+	\begin{mdframed}%
+		\ifthenelse{\value{zreflevel} > 3}{%
+			\tempname \textit{-- stopped nesting}%
+		}{%
+			\tempname \input{../#2/zettel.tex}%
+		}%
+	\end{mdframed}%
+	\setcounter{zinclevel}{\value{zinclevel} - 1}%
 }
 
 \newcommand{\inkfig}[1]{
