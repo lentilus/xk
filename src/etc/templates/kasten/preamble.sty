@@ -135,7 +135,7 @@
 	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
 	\stepcounter{zinclevel}%
 	\begin{mdframed}%
-		\ifthenelse{\value{zreflevel} > 3}{%
+		\ifthenelse{\value{zinclevel} > 3}{%
 			\tempname \textit{-- stopped nesting}%
 		}{%
 			\tempname \input{../#1/zettel.tex}%
