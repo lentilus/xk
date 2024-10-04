@@ -3,55 +3,21 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
-	"strings"
 	"xk/src/userscripts-go/pkg/api"
+	"xk/src/userscripts-go/pkg/logging"
 	"xk/src/userscripts-go/pkg/treesitter"
 
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
-const logMaxLines = 100 // Set the maximum number of log lines to keep
-
-// Function to truncate the log file to the last N lines
-func truncateLogFile(logFilePath string, maxLines int) {
-	file, err := os.Open(logFilePath)
-	if err != nil {
-		log.Fatalf("Error opening log file for truncation: %v", err)
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error reading log file: %v", err)
-	}
-
-	// Keep only the last `maxLines` lines
-	if len(lines) > maxLines {
-		lines = lines[len(lines)-maxLines:]
-	}
-
-	// Write the truncated lines back to the log file
-	err = ioutil.WriteFile(logFilePath, []byte(strings.Join(lines, "\n")+"\n"), 0644)
-	if err != nil {
-		log.Fatalf("Error writing to log file: %v", err)
-	}
-}
-
-func panicWithLog(msg string, args ...interface{}) {
-	log.Printf(msg, args...)
-	panic(fmt.Sprintf(msg, args...))
-}
+// Array to hold the LaTeX commands to extract as references
+var latexCommands = []string{"zref", "zinc"}
 
 func main() {
 	// Add a command-line flag for the Zettel name
@@ -60,18 +26,18 @@ func main() {
 
 	// Check if the Zettel name is provided
 	if *zettelName == "" {
-		panicWithLog("You must provide a Zettel name using the -z option.")
+		logging.PanicWithLog("You must provide a Zettel name using the -z option.")
 	}
 
 	// Use xk API to get the path to the Zettel
 	zettelPaths, err := api.Xk("path", map[string]string{"z": *zettelName})
 	if err != nil {
-		panicWithLog("Error fetching Zettel path: %v", err)
+		logging.PanicWithLog("Error fetching Zettel path: %v", err)
 	}
 
 	// Check if we have any paths; if not, throw an error
 	if len(zettelPaths) == 0 {
-		panicWithLog("Error: No paths returned for the given Zettel name.")
+		logging.PanicWithLog("Error: No paths returned for the given Zettel name.")
 	}
 
 	// Use only the first path
@@ -82,23 +48,23 @@ func main() {
 	referencesFilePath := filepath.Join(zettelPath, "references")
 	logFilePath := filepath.Join(zettelPath, "references.log")
 
-	// Open or create the log file
-	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Open or create the log file and set log output
+	logFile, err := logging.SetLogOutput(logFilePath)
 	if err != nil {
-		panicWithLog("Error opening log file: %v", err)
+		logging.PanicWithLog("Error setting log output: %v", err)
 	}
 	defer logFile.Close()
 
-	// Set log output to the log file
-	log.SetOutput(logFile)
-
 	// Truncate the log file to keep only the last N lines
-	truncateLogFile(logFilePath, logMaxLines)
+	err = logging.TruncateLogFile(logFilePath, logging.LogMaxLines)
+	if err != nil {
+		logging.PanicWithLog("Error truncating log file: %v", err)
+	}
 
 	// Read the content of zettel.tex
 	source, err := ioutil.ReadFile(texFilePath)
 	if err != nil {
-		panicWithLog("Error reading zettel.tex file: %v", err)
+		logging.PanicWithLog("Error reading zettel.tex file: %v", err)
 	}
 
 	// Initialize the parser for LaTeX
@@ -114,11 +80,11 @@ func main() {
 	// Get the root node of the parsed tree
 	rootNode := tree.RootNode()
 
-	// Extract commands \zref and \zinc
-	refCommands := append(
-		treesitter.FindGenericCommand(rootNode, source, "zref"),
-		treesitter.FindGenericCommand(rootNode, source, "zinc")...,
-	)
+	// Extract commands from latexCommands array
+	var refCommands []treesitter.GenericCommand
+	for _, cmd := range latexCommands {
+		refCommands = append(refCommands, treesitter.FindGenericCommand(rootNode, source, cmd)...)
+	}
 
 	// Store references in a map to avoid duplicates
 	refs := map[string]bool{}
@@ -150,7 +116,7 @@ func main() {
 	// Create a temporary file to store the references
 	tmpFile, err := ioutil.TempFile("", "references-*.tmp")
 	if err != nil {
-		panicWithLog("Error creating temporary file: %v", err)
+		logging.PanicWithLog("Error creating temporary file: %v", err)
 	}
 	defer os.Remove(tmpFile.Name()) // Ensure the temp file is removed after use
 
@@ -159,7 +125,7 @@ func main() {
 	for _, ref := range sortedRefs {
 		_, err := writer.WriteString(ref + "\n")
 		if err != nil {
-			panicWithLog("Error writing to temporary file: %v", err)
+			logging.PanicWithLog("Error writing to temporary file: %v", err)
 		}
 	}
 	writer.Flush()
@@ -170,7 +136,7 @@ func main() {
 		// If it doesn't exist, create it
 		log.Println("References file does not exist, creating it.")
 		if _, err := os.Create(referencesFilePath); err != nil {
-			panicWithLog("Error creating references file: %v", err)
+			logging.PanicWithLog("Error creating references file: %v", err)
 		}
 	}
 
@@ -179,7 +145,7 @@ func main() {
 	diffOutput, err := diffCmd.CombinedOutput()
 	if err != nil &&
 		err.Error() != "exit status 1" { // exit status 1 means diff found differences, not an actual error
-		panicWithLog("Error running diff: %v", err)
+		logging.PanicWithLog("Error running diff: %v", err)
 	}
 	if len(diffOutput) > 0 {
 		log.Println("Changes in references:")
@@ -191,11 +157,11 @@ func main() {
 	// Overwrite the references file with the temporary file contents
 	tempContents, err := ioutil.ReadFile(tmpFile.Name())
 	if err != nil {
-		panicWithLog("Error reading temporary file: %v", err)
+		logging.PanicWithLog("Error reading temporary file: %v", err)
 	}
 	err = ioutil.WriteFile(referencesFilePath, tempContents, 0644)
 	if err != nil {
-		panicWithLog("Error writing to references file: %v", err)
+		logging.PanicWithLog("Error writing to references file: %v", err)
 	}
 
 	log.Println("References file updated successfully.")
