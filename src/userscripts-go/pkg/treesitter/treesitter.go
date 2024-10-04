@@ -75,3 +75,63 @@ func FindGenericCommand(node *sitter.Node, source []byte, command string) []Gene
 
 	return foundCommands
 }
+
+// GenericEnvironment holds the environment and its begin-node (often containing arguments)
+type GenericEnvironment struct {
+	EnvironmentNode *sitter.Node   // The node for the environment
+	ArgumentNodes   []*sitter.Node // The node for the environment's \begin
+}
+
+// FindGenericEnvironment searches for LaTeX environments and extracts their \begin nodes.
+func FindGenericEnvironment(
+	node *sitter.Node,
+	source []byte,
+	environment string,
+) []GenericEnvironment {
+	var foundEnvironments []GenericEnvironment
+
+	if node == nil {
+		return foundEnvironments
+	}
+
+	// Check if the current node is a generic_environment
+	if node.Type() == "generic_environment" {
+		// Get the \begin node
+		beginNode := node.ChildByFieldName("begin")
+
+		// Ensure the \begin node exists
+		if beginNode != nil {
+			// Inside the begin node, check for the curly_group after \begin that contains the environment name
+			nameNode := beginNode.Child(0).NextSibling()
+			name := nameNode.Content(source)
+
+			// Ensure the curly_group exists
+			if nameNode != nil && nameNode.Type() == "curly_group_text" {
+				// Check if the curly_group text is the expected environment name (e.g., "{flashcard}")
+				if name == "{"+environment+"}" {
+					// Store the found environment and its begin node
+					argNodes := []*sitter.Node{}
+
+					// Append remaining siblings to argNodes
+					for sibling := nameNode.NextSibling(); sibling != nil; sibling = sibling.NextSibling() {
+						argNodes = append(argNodes, sibling)
+					}
+
+					foundEnvironments = append(foundEnvironments, GenericEnvironment{
+						EnvironmentNode: node,
+						ArgumentNodes:   argNodes,
+					})
+				}
+			}
+		}
+	}
+
+	// Recursively search through each child node
+	for i := 0; i < int(node.ChildCount()); i++ {
+		foundEnvironments = append(
+			foundEnvironments,
+			FindGenericEnvironment(node.Child(i), source, environment)...)
+	}
+
+	return foundEnvironments
+}
