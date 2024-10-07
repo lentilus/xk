@@ -1,5 +1,5 @@
 {
-  description = "A simple latex centric zettelkasten written in bash";
+  description = "A simple latex-centric zettelkasten written in bash";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -9,13 +9,23 @@
     packages.x86_64-linux = let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
-      default = pkgs.stdenv.mkDerivation {
+      default = pkgs.buildGoModule {
         pname = "xettelkasten";
         version = "1.0.0";
 
         src = ./.;
+        modRoot = ./.;
+        vendorHash = null;
 
-        buildInputs = [ pkgs.bash pkgs.go ];
+        buildInputs = [
+          pkgs.bash
+        ];
+
+        buildPhase = ''
+          go build -o $out/share/xk/userscripts/genrefs ./src/userscripts-go/cmd/genrefs
+          go build -o $out/share/xk/userscripts/gencards ./src/userscripts-go/cmd/gencards
+          go build -o $out/share/xk/userscripts/syncanki ./src/userscripts-go/cmd/syncanki
+        '';
 
         installPhase = ''
           mkdir -p $out/bin
@@ -30,12 +40,6 @@
 
           # bash userscripts
           cp -r src/userscripts-bash/* $out/share/xk/userscripts
-
-          # go usercripts
-          find src/userscripts-go/cmd -mindepth 2 -maxdepth 2 -name main.go | while read main_file; do
-             script_name=$(basename $(dirname $main_file))
-             go build -o $out/share/xk/userscripts/$script_name "./$(dirname $main_file)"
-          done
         '';
 
         meta = with pkgs.lib; {
@@ -43,12 +47,6 @@
           license = licenses.mit;
         };
       };
-    };
-
-    devShells.x86_64-linux = let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    in pkgs.mkShell {
-      buildInputs = [ pkgs.bash ];
     };
   };
 }
