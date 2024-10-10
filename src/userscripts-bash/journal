@@ -1,0 +1,6 @@
+#!/bin/bash
+
+date="$(date +%Y-%m-%d)"
+title="__journal_${date}"
+
+xk insert -z "$title"
