@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+ref_insert() {
+    eval "$(parse_args "$@")"
+
+    [[ -d "$ZETTEL_DATA/$ref" ]] || abort "the zettel $ref does not exist."
+    grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" && abort "Reference $ref already present."
+
+    echo "$ref" >> "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
+}
+
+ref_ls() {
+    eval "$(parse_args "$@")"
+    grep -v ^$ "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || abort "failed getting refs"
+}
+
+ref_rm() {
+    eval "$(parse_args "$@")"
+    grep -qx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME" || abort "No reference named $ref."
+
+    updated="$(grep -vx "$ref" "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME")" || updated=""
+    echo "$updated" > "$ZETTEL_DATA/$zettel/$REFERENCE_FILENAME"
+    return 0
+}
+
+# stop here if file is being sourced, not run
+[[ "$0" != "$BASH_SOURCE" ]] && return
+
+case "$1" in
+    insert)
+        shift
+        ref_insert "$@"
+        ;;
+    ls)
+        shift
+        ref_ls "$@"
+        ;;
+    rm)
+        shift
+        ref_rm "$@"
+        ;;
+    *)
+        echo "invalid ref command $1"
+        ;;
+esac

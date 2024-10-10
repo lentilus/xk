@@ -1,0 +1,152 @@
+\ProvidesPackage{preamble}[2024/09/09 Custom Preamble]
+
+% for including other zettels
+\usepackage[subpreambles=false]{standalone}
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{faktor}
+\usepackage{thmtools}
+\usepackage{mathtools}
+\usepackage{mathdots}
+\usepackage{enumitem}
+\usepackage{comment}
+\usepackage{etoolbox}
+\usepackage{currfile}
+\usepackage{subfiles}
+\usepackage{currfile}
+
+\usepackage{xparse}
+\usepackage{xstring}
+\usepackage{xifthen}
+
+\usepackage{import}
+\usepackage{pdfpages}
+\usepackage{transparent}
+
+\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+\usepackage[linewidth=1pt]{mdframed}
+
+\declaretheoremstyle[notebraces={[}{]},headpunct=\newline,]{custom}
+\theoremstyle{custom}
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{corollary}{Corollary}
+
+\theoremstyle{custom}
+\newtheorem*{axiom}{Axiom}
+\newtheorem*{definition}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\La}{\mathcal{L}}
+\newcommand{\Pot}{\mathcal{P}}
+\newcommand{\lmable}{\Omega_{\R^n}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\Spur}{Spur}
+\DeclareMathOperator{\Rad}{Rad}
+\DeclareMathOperator{\Hess}{Hess}
+\DeclareMathOperator{\Sym}{Sym}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\Eig}{Eig}
+\DeclareMathOperator{\Image}{Im}
+\DeclareMathOperator{\Iso}{Iso}
+\DeclareMathOperator{\Isom}{Iso} % legacy
+\DeclareMathOperator{\Isome}{Isom}
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\Bil}{Bil}
+\DeclareMathOperator{\chr}{char}
+\DeclareMathOperator{\End}{End}
+\DeclareMathOperator{\Vol}{Vol}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\HP}{HP}
+\DeclareMathOperator{\rand}{rand}
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\grad}{grad}
+
+\setlength\parindent{0pt}
+\pagestyle{empty}
+
+\let\oldforall\forall
+\let\oldexists\exists
+\renewcommand{\forall}{\ \oldforall}
+\renewcommand{\exists}{\ \oldexists}
+\renewcommand{\bar}{\overline}
+
+\makeatletter
+\newcommand{\set}[1]{\@ifnextchar\bgroup {\left\{#1\filteredset} {\{#1\}} }
+\newcommand{\filteredset}[1]{\ \setseperator \ #1 \right\}}
+\newcommand{\setseperator}{\middle|}
+\newcommand\del[1]{\@ifnextchar /
+{\@del{#1}}
+{\@del/{#1}}}
+\def\@del#1/#2{\frac{\partial #1}{\partial #2}}
+\makeatother
+
+\ExplSyntaxOn
+\clist_new:N \l_feq_vector_clist
+\NewDocumentCommand{\vect}{O{\\}mO{p}}{
+\clist_set:Nn \l_feq_vector_clist {#2}
+\begin{#3matrix}
+\clist_use:Nn \l_feq_vector_clist {#1}
+\end{#3matrix}
+}
+\ExplSyntaxOff
+
+\newcommand{\zz}{\mathrm{Z\kern-.4em\raise-0.5ex\hbox{Z}}}
+\newcommand{\tx}[1]{\text{ #1 }}
+\newcommand{\from}{\colon}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\constrain}[1]{_{\big{|_{#1}}}}
+
+\newenvironment{flashcard}[2][none]{
+	\begin{mdframed}[%
+			%backgroundcolor=black!15,%
+			rightline=false,%
+			topline=false,%
+			bottomline=true,%
+			leftline=false%
+		]
+		#2 \hfill \texttt{#1}\\
+		}
+		{
+	\end{mdframed}
+}
+
+\newenvironment{question}{\par\itshape}{\par}
+
+\newenvironment{zettel}{}{}
+
+\newcommand{\zref}[1]{%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
+	\tempname%
+}%
+
+\newcounter{zinclevel}
+\setcounter{zinclevel}{0}
+\newcommand{\zinc}[1]{%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
+	\stepcounter{zinclevel}%
+	\begin{mdframed}%
+		\ifthenelse{\value{zinclevel} > 3}{%
+			\tempname \textit{-- stopped nesting}%
+		}{%
+			\tempname \input{../#1/zettel.tex}%
+		}%
+	\end{mdframed}%
+	\setcounter{zinclevel}{\value{zinclevel} - 1}%
+}
+
+\newcommand{\inkfig}[1]{
+	\begingroup\centering%
+	\def\svgwidth{\columnwidth}%
+	\import{\currfiledir figures}{#1.pdf_tex}%
+	\endgroup%
+}

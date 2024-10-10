@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -e
+
+git_check() {
+    if [ -d "$ZETTEL_DATA/.git" ]; then
+        log ".git directory exists"
+        return 0
+    else
+        abort ".git directory does not exist."
+    fi
+}
+
+git_init() {
+    log "running git init"
+    git init || abort "git init failed"
+}
+
+git_cmd() {
+    git_check
+    log "running git" "$@"
+    git "$@" || abort "Error running git $*"
+}
+
+git_publish() {
+   git_cmd add -A
+   timestamp=$(date -u +"%Y-%m-%d")
+   git_cmd commit -m "publish $timestamp"
+   git_cmd push
+}
+
+# stop here if file is being sourced, not run
+[[ "$0" != "$BASH_SOURCE" ]] && return
+cd "$ZETTEL_DATA" || abort "failed to cd to $ZETTEL_DATA"
+
+case "$1" in
+    init)
+        git_init
+        ;;
+    publish)
+        git_publish
+        ;;
+    help)
+        git_help
+        ;;
+    *)
+        git_cmd "$@"
+        ;;
+esac

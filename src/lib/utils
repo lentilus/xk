@@ -1,0 +1,62 @@
+#!/bin/bash
+
+log() {
+	script_name=${0##*/}
+	timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+	echo "== $script_name $timestamp" "$@" >> "$LOG_FILE"
+}
+
+abort() {
+    log "Error: $1. Aborting."
+    echo "Error: $1. Aborting." >&2
+    exit 1
+}
+
+check_kasten() {
+    [[ -d $ZETTEL_DATA ]] || abort "$ZETTEL_DATA does not exist. Please run init"
+    log "kasten check passed."
+}
+
+parse_args() {
+    # Initialize variables
+    zettel=""
+    new_zettel="" # This will get renamed in the future to new to be used for refs and tags as well
+    path=""
+    ref=""
+    tag=""
+    
+    OPTSTRING=":z:p:n:r:t:"
+
+    while getopts ${OPTSTRING} opt; do
+        case ${opt} in
+            z)
+                zettel=${OPTARG// /_}
+                ;;
+            n)
+                new_zettel=${OPTARG// /_}
+                ;;
+            p)
+                path=${OPTARG}
+                ;;
+            r)
+                ref=${OPTARG// /_}
+                ;;
+            t)
+                tag=${OPTARG// /_}
+                ;;
+            :)
+                log "Error: Missing argument for option -${OPTARG}"; exit 1
+                ;;
+            ?)
+                log "Error: Invalid option -${OPTARG}"; exit 1
+                ;;
+        esac
+    done
+
+    # return variable assignments as string
+    echo "zettel='$zettel';\
+          new_zettel='$new_zettel';\
+          path='$path';\
+          ref='$ref';\
+          tag='$tag';"
+}
