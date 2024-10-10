@@ -19,6 +19,8 @@
 
         buildInputs = [
           pkgs.bash
+          pkgs.pdf2svg
+          pkgs.texliveFull
         ];
 
         buildPhase = ''
