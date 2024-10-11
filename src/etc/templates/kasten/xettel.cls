@@ -4,8 +4,20 @@
 \LoadClass[class=article, crop=false]{standalone}
 
 \RequirePackage{../preamble}
+\RequirePackage[backend=biber]{biblatex}
+\RequirePackage{hyperref}
 
-\AtBeginDocument{\begin{zettel} }
-		\AtEndDocument{\end{zettel}}
+\addbibresource{../zettelkasten.bib}
+
+\DeclareBibliographyDriver{zettel}{%
+	\printfield{title}%
+	\setunit{\addspace}%
+	,\printnames{author}%
+}
+
+\AtBeginDocument{}
+\AtEndDocument{
+	\printbibliography
+}
 
 \endinput
