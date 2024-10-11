@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }: {
     overlay = (final: prev: {
-        xk = final.callPackage self.packages.x86_64-linux.default {};
+        xk = self.packages.x86_64-linux.default {};
       });
     packages.x86_64-linux = let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
