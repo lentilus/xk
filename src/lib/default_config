@@ -45,6 +45,6 @@ BIB_FILENAME="zettelkasten.bib"
 BIB_PREAMBLE='@preamble{"\newcommand{\kasten}{$ZETTEL_DATA}"}'
 BIB_ENTRY='
 @zettel{$ZETTEL,
-    title = {\href{\kasten/$ZETTEL/zettel.pdf}{$ZETTEL}},
+    title = {\href{\kasten/$ZETTEL/zettel.pdf}{$ESCAPED_ZETTEL}},
     author = {$AUTHOR},
 }'

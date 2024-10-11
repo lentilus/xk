@@ -23,6 +23,7 @@ echo "$BIB_PREAMBLE" | envsubst > "$TEMP_FILE"
 # Append entries for all zettels
 xk ls | while IFS= read -r ZETTEL; do
     export ZETTEL  # Make ZETTEL an environment variable
+    export ESCAPED_ZETTEL=${ZETTEL//_/ }
     echo "$BIB_ENTRY" | envsubst >> "$TEMP_FILE"
 done
 
