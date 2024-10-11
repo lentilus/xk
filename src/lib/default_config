@@ -2,8 +2,12 @@
 
 # disable warnings about unused variables
 # we source this file and export
-# the variables in src/xettelkasten
+# the variables in src/xettelkasten.
+# Variable in '' will be used for
+# env subsitution.
+#
 # shellcheck disable=SC2034
+# shellcheck disable=SC2016
 
 # template
 ZETTEL_TEMPLATE="$ETC_DIR/templates/zettel.tex"
@@ -34,4 +38,13 @@ LOG_FILE="/tmp/xettelkasten_test.log"
 # the above options will be overwritten
 # if set in .config/xk/config
 
-# for builtin userscripts
+### for builtin userscripts ###
+AUTHOR="$USER"
+
+BIB_FILENAME="zettelkasten.bib"
+BIB_PREAMBLE='@preamble{"\newcommand{\kasten}{$ZETTEL_DATA}"}'
+BIB_ENTRY='
+@zettel{$ZETTEL,
+    title = {\href{\kasten/$ZETTEL/zettel.pdf}{$ZETTEL}},
+    author = {$AUTHOR},
+}'
