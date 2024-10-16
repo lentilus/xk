@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -22,6 +23,11 @@ var latexCommands = []string{"cite"}
 func main() {
 	// Add a command-line flag for the Zettel name
 	zettelName := flag.String("z", "", "Name of the Zettel to extract references from")
+	refQuery, set := os.LookupEnv("TS_QUERY_REF")
+	if !set || refQuery == "" {
+		logging.PanicWithLog("Treesitter query for references not configured.")
+	}
+
 	flag.Parse()
 
 	// Check if the Zettel name is provided
@@ -77,33 +83,36 @@ func main() {
 	tree := parser.Parse(nil, source)
 	defer tree.Close()
 
-	// Get the root node of the parsed tree
-	rootNode := tree.RootNode()
-
-	// Extract commands from latexCommands array
-	var refCommands []treesitter.GenericCommand
-	for _, cmd := range latexCommands {
-		refCommands = append(refCommands, treesitter.FindGenericCommand(rootNode, source, cmd)...)
+	// Query the tree
+	query, err := sitter.NewQuery([]byte(refQuery), lang)
+	if err != nil {
+		panic(err)
 	}
+	cursor := sitter.NewQueryCursor()
+	cursor.Exec(query, tree.RootNode())
 
-	// Store references in a map to avoid duplicates
 	refs := map[string]bool{}
-	for _, c := range refCommands {
-		start := c.ArgumentNode.StartByte() + 1
-		end := c.ArgumentNode.EndByte() - 1
-		if !(start < end) {
-			continue
+	for {
+		m, ok := cursor.NextMatch()
+		if !ok {
+			break
 		}
-		arg := string(source[start:end])
-
-		// Validate the reference by checking if it can be found with `xk path`
-		_, err := api.Xk("path", map[string]string{"z": arg})
-		if err != nil {
-			// Log the error but continue with the next reference
-			log.Printf("Invalid reference %s: %v", arg, err)
-			continue
+		// Apply predicates filtering
+		m = cursor.FilterPredicates(m, source)
+		for _, c := range m.Captures {
+			ref := c.Node.Content(source)
+			sref := ref[1 : len(ref)-1]
+			if ref == fmt.Sprintf("{%s}", sref) || ref == fmt.Sprintf("[%s]", sref) {
+				ref = sref
+			}
+			_, err := api.Xk("path", map[string]string{"z": ref})
+			if err != nil {
+				// Log the error but continue with the next reference
+				log.Printf("Invalid reference %s: %v", ref, err)
+				continue
+			}
+			refs[ref] = true
 		}
-		refs[arg] = true
 	}
 
 	// Create a slice from the map keys and sort them alphabetically

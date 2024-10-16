@@ -48,3 +48,5 @@ BIB_ENTRY='
     title = {\href{\kasten/$ZETTEL/zettel.pdf}{$ESCAPED_ZETTEL}},
     author = {$AUTHOR},
 }'
+
+TS_QUERY_REF='(citation (curly_group_text_list) @reference)'
