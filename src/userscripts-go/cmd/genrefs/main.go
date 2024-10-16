@@ -17,7 +17,7 @@ import (
 )
 
 // Array to hold the LaTeX commands to extract as references
-var latexCommands = []string{"zref", "zinc"}
+var latexCommands = []string{"cite"}
 
 func main() {
 	// Add a command-line flag for the Zettel name

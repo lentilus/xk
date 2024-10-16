@@ -6,6 +6,9 @@
   };
 
   outputs = { self, nixpkgs }: {
+    overlay = (final: prev: {
+        xk = self.packages.x86_64-linux.default;
+      });
     packages.x86_64-linux = let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {

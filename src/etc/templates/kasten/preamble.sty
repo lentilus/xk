@@ -1,11 +1,17 @@
 \ProvidesPackage{preamble}[2024/09/09 Custom Preamble]
 
-% for including other zettels
+\author{lentilus}
+
+% Load packages for including other zettels
 \usepackage[subpreambles=false]{standalone}
 
+% Encoding and language settings
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
-\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{csquotes}
+
+% Mathematics packages
+\usepackage{amsmath, amssymb, amsfonts, amsthm}
 \usepackage{faktor}
 \usepackage{thmtools}
 \usepackage{mathtools}
@@ -13,42 +19,34 @@
 \usepackage{enumitem}
 \usepackage{comment}
 \usepackage{etoolbox}
-\usepackage{currfile}
+
+% File handling and importing
 \usepackage{subfiles}
-\usepackage{currfile}
-
-\usepackage{xparse}
-\usepackage{xstring}
-\usepackage{xifthen}
-
 \usepackage{import}
 \usepackage{pdfpages}
 \usepackage{transparent}
 
-\definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
+% Frame and color settings
 \usepackage[linewidth=1pt]{mdframed}
+% Uncomment and adjust color if needed
+% \definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
 
-\declaretheoremstyle[notebraces={[}{]},headpunct=\newline,]{custom}
+% Theorem styles
+\declaretheoremstyle[notebraces={[}{]},headpunct=\newline]{custom}
 \theoremstyle{custom}
 \newtheorem*{theorem}{Theorem}
 \newtheorem*{lemma}{Lemma}
 \newtheorem*{corollary}{Corollary}
-
-\theoremstyle{custom}
 \newtheorem*{axiom}{Axiom}
 \newtheorem*{definition}{Definition}
 \newtheorem*{example}{Example}
 \newtheorem*{remark}{Remark}
 
-\newcommand{\La}{\mathcal{L}}
-\newcommand{\Pot}{\mathcal{P}}
-\newcommand{\lmable}{\Omega_{\R^n}}
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\K}{\mathbb{K}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\Q}{\mathbb{Q}}
-\newcommand{\C}{\mathbb{C}}
+% Personal layout preferences
+\setlength\parindent{0pt}
+\pagestyle{empty}
 
+% Math operators
 \DeclareMathOperator{\Mat}{Mat}
 \DeclareMathOperator{\Spur}{Spur}
 \DeclareMathOperator{\Rad}{Rad}
@@ -58,8 +56,7 @@
 \DeclareMathOperator{\Eig}{Eig}
 \DeclareMathOperator{\Image}{Im}
 \DeclareMathOperator{\Iso}{Iso}
-\DeclareMathOperator{\Isom}{Iso} % legacy
-\DeclareMathOperator{\Isome}{Isom}
+\DeclareMathOperator{\Isom}{Isom} % legacy
 \DeclareMathOperator{\Hom}{Hom}
 \DeclareMathOperator{\Bil}{Bil}
 \DeclareMathOperator{\chr}{char}
@@ -71,15 +68,24 @@
 \DeclareMathOperator{\ord}{ord}
 \DeclareMathOperator{\grad}{grad}
 
-\setlength\parindent{0pt}
-\pagestyle{empty}
-
+% Change existing commands
 \let\oldforall\forall
 \let\oldexists\exists
 \renewcommand{\forall}{\ \oldforall}
 \renewcommand{\exists}{\ \oldexists}
 \renewcommand{\bar}{\overline}
 
+% Custom math commands
+\newcommand{\La}{\mathcal{L}}
+\newcommand{\Pot}{\mathcal{P}}
+\newcommand{\lmable}{\Omega_{\mathbb{R}^n}} % Use \mathbb{R} for consistency
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+
+% Set notation
 \makeatletter
 \newcommand{\set}[1]{\@ifnextchar\bgroup {\left\{#1\filteredset} {\{#1\}} }
 \newcommand{\filteredset}[1]{\ \setseperator \ #1 \right\}}
@@ -90,6 +96,7 @@
 \def\@del#1/#2{\frac{\partial #1}{\partial #2}}
 \makeatother
 
+% Custom vector environment
 \ExplSyntaxOn
 \clist_new:N \l_feq_vector_clist
 \NewDocumentCommand{\vect}{O{\\}mO{p}}{
@@ -100,39 +107,18 @@
 }
 \ExplSyntaxOff
 
+% Custom commands
 \newcommand{\zz}{\mathrm{Z\kern-.4em\raise-0.5ex\hbox{Z}}}
 \newcommand{\tx}[1]{\text{ #1 }}
 \newcommand{\from}{\colon}
 \newcommand{\norm}[1]{\left\|#1\right\|}
 \newcommand{\constrain}[1]{_{\big{|_{#1}}}}
 
-\newenvironment{flashcard}[2][none]{
-	\begin{mdframed}[%
-			%backgroundcolor=black!15,%
-			rightline=false,%
-			topline=false,%
-			bottomline=true,%
-			leftline=false%
-		]
-		#2 \hfill \texttt{#1}\\
-		}
-		{
-	\end{mdframed}
-}
-
-\newenvironment{question}{\par\itshape}{\par}
-
-\newenvironment{zettel}{}{}
-
-\newcommand{\zref}[1]{%
-	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
-	\tempname%
-}%
-
+% Zettel indexing
 \newcounter{zinclevel}
 \setcounter{zinclevel}{0}
 \newcommand{\zinc}[1]{%
-	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}} }%
+	\def\tempname{\texttt{\underline{\StrSubstitute{#1}{_}{\space}}}}%
 	\stepcounter{zinclevel}%
 	\begin{mdframed}%
 		\ifthenelse{\value{zinclevel} > 3}{%
@@ -144,9 +130,18 @@
 	\setcounter{zinclevel}{\value{zinclevel} - 1}%
 }
 
-\newcommand{\inkfig}[1]{
+% Figure import command
+\newcommand{\inkfig}[1]{%
 	\begingroup\centering%
 	\def\svgwidth{\columnwidth}%
 	\import{\currfiledir figures}{#1.pdf_tex}%
 	\endgroup%
+}
+
+% Custom environments
+\newenvironment{flashcard}[2][none]{%
+	\begin{mdframed}
+		#2 \hfill \texttt{#1}\\
+		}{%
+	\end{mdframed}%
 }
