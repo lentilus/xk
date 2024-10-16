@@ -101,10 +101,14 @@ func main() {
 		m = cursor.FilterPredicates(m, source)
 		for _, c := range m.Captures {
 			ref := c.Node.Content(source)
+
+			// strip brackets if necessary
 			sref := ref[1 : len(ref)-1]
 			if ref == fmt.Sprintf("{%s}", sref) || ref == fmt.Sprintf("[%s]", sref) {
 				ref = sref
 			}
+
+			// validate zettels existence
 			_, err := api.Xk("path", map[string]string{"z": ref})
 			if err != nil {
 				// Log the error but continue with the next reference
