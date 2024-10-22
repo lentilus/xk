@@ -133,12 +133,19 @@ func main() {
 	}
 
 	for _, card := range cardsToFix {
-		// get the flashcard id
-		defer RemoveCard(&connect, card)
+		fmt.Printf("Card %d needs to be fixed\n", card)
 
-		cardID, err := GetCardField(&connect, card, "id")
+		noteID, err := Card2Note(&connect, card)
 		if err != nil {
-			log.Println("Unable to get cards id. Skipping")
+			log.Println(err)
+			continue
+		}
+
+		defer RemoveCard(&connect, noteID)
+
+		cardID, err := GetCardField(&connect, noteID, "id")
+		if err != nil {
+			log.Println(err)
 			continue
 		}
 		cardIDstring, ok := cardID.(string)
@@ -147,7 +154,7 @@ func main() {
 			continue
 		}
 
-		fixme, err := GetCardField(&connect, card, "fixme")
+		fixme, err := GetCardField(&connect, noteID, "fixme")
 		if err != nil {
 			log.Println("Unable to get cards fixme. Skipping")
 			continue
@@ -164,8 +171,13 @@ func main() {
 			log.Println("Unable to find origin zettel. Skipping")
 			continue
 		}
+		fmt.Printf("Found it in zettel %s.\n", originZettel)
 
-		InsertFixme(originZettel, cardIDstring, fixmeString)
+		err = InsertFixme(originZettel, cardIDstring, fixmeString)
+		if err != nil {
+			fmt.Println("Error during fixing: ")
+			fmt.Print(err)
+		}
 	}
 
 	zettels, err := api.Xk("ls", map[string]string{})

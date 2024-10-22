@@ -248,7 +248,7 @@ func findFlashcards(zettelPath string) ([]Flashcard, error) {
 	// and the card has no fixme file.
 	for id, frontPath := range frontFiles {
 		// Check if card has a fixme file
-		fixmePath := fmt.Sprintf("%s/fixme_%s", zettelPath, id)
+		fixmePath := fmt.Sprintf("%s/fix_%s", zettelPath, id)
 		_, err := os.Stat(fixmePath)
 		if !os.IsNotExist(err) {
 			fmt.Println("Card must be fixed. Not syncing to anki")
