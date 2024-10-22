@@ -8,9 +8,10 @@ import (
 )
 
 // the Anki-Connect API
-var connect = AnkiConnect{Url: "http://localhost:8765"}
-var deck = "testibunti"
-var modelName = "xkCard"
+var url, _ = os.LookupEnv("ANKI_CONNECT_URL")
+var deck, _ = os.LookupEnv("ANKI_DECK_NAME")
+var modelName, _ = os.LookupEnv("ANKI_MODEL_NAME")
+var connect = AnkiConnect{Url: url}
 
 // Flashcard structure, representing front, back, id, hash
 type Flashcard struct {

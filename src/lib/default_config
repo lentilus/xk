@@ -50,3 +50,6 @@ BIB_ENTRY='
 }'
 
 TS_QUERY_REF='(citation (curly_group_text_list) @reference)'
+
+ANKI_CONNECT_URL="http://localhost:8765"
+ANKI_MODEL_NAME="xkCard"
