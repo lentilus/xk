@@ -251,27 +251,27 @@ func findFlashcards(zettelPath string) ([]Flashcard, error) {
 		fixmePath := fmt.Sprintf("%s/fix_%s", zettelPath, id)
 		_, err := os.Stat(fixmePath)
 		if !os.IsNotExist(err) {
-			fmt.Println("Card must be fixed. Not syncing to anki")
+			log.Println("Card must be fixed. Not syncing to anki")
 			continue
 		}
 
 		// Check that both front and back files exist
 		backPath, exists := backFiles[id]
 		if !exists {
-			fmt.Printf("Missing back file for card ID %s. Skipping card.\n", id)
+			log.Printf("Missing back file for card ID %s. Skipping card.\n", id)
 			continue
 		}
 
 		// Read content from the front and back files
 		frontContent, err := os.ReadFile(frontPath)
 		if err != nil {
-			fmt.Printf("Error reading front file for card ID %s: %v. Skipping card.\n", id, err)
+			log.Printf("Error reading front file for card ID %s: %v. Skipping card.\n", id, err)
 			continue
 		}
 
 		backContent, err := os.ReadFile(backPath)
 		if err != nil {
-			fmt.Printf("Error reading back file for card ID %s: %v. Skipping card.\n", id, err)
+			log.Printf("Error reading back file for card ID %s: %v. Skipping card.\n", id, err)
 			continue
 		}
 

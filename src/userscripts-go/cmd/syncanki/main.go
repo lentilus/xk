@@ -133,7 +133,7 @@ func main() {
 	}
 
 	for _, card := range cardsToFix {
-		fmt.Printf("Card %d needs to be fixed\n", card)
+		log.Printf("Card %d needs to be fixed\n", card)
 
 		noteID, err := Card2Note(&connect, card)
 		if err != nil {
@@ -171,12 +171,12 @@ func main() {
 			log.Println("Unable to find origin zettel. Skipping")
 			continue
 		}
-		fmt.Printf("Found it in zettel %s.\n", originZettel)
+		log.Printf("Found it in zettel %s.\n", originZettel)
 
 		err = InsertFixme(originZettel, cardIDstring, fixmeString)
 		if err != nil {
-			fmt.Println("Error during fixing: ")
-			fmt.Print(err)
+			log.Println("Error during fixing: ")
+			log.Print(err)
 		}
 	}
 
@@ -224,7 +224,6 @@ func main() {
 
 	// Process each zettel
 	for _, z := range zettels {
-		// fmt.Println(z)
 		processZettel(z)
 	}
 }
