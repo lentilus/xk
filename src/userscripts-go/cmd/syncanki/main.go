@@ -8,9 +8,10 @@ import (
 )
 
 // the Anki-Connect API
-var connect = AnkiConnect{Url: "http://localhost:8765"}
-var deck = "testibunti"
-var modelName = "xkCard"
+var url, _ = os.LookupEnv("ANKI_CONNECT_URL")
+var deck, _ = os.LookupEnv("ANKI_DECK_NAME")
+var modelName, _ = os.LookupEnv("ANKI_MODEL_NAME")
+var connect = AnkiConnect{Url: url}
 
 // Flashcard structure, representing front, back, id, hash
 type Flashcard struct {
@@ -132,12 +133,19 @@ func main() {
 	}
 
 	for _, card := range cardsToFix {
-		// get the flashcard id
-		defer RemoveCard(&connect, card)
+		log.Printf("Card %d needs to be fixed\n", card)
 
-		cardID, err := GetCardField(&connect, card, "id")
+		noteID, err := Card2Note(&connect, card)
 		if err != nil {
-			log.Println("Unable to get cards id. Skipping")
+			log.Println(err)
+			continue
+		}
+
+		defer RemoveCard(&connect, noteID)
+
+		cardID, err := GetCardField(&connect, noteID, "id")
+		if err != nil {
+			log.Println(err)
 			continue
 		}
 		cardIDstring, ok := cardID.(string)
@@ -146,7 +154,7 @@ func main() {
 			continue
 		}
 
-		fixme, err := GetCardField(&connect, card, "fixme")
+		fixme, err := GetCardField(&connect, noteID, "fixme")
 		if err != nil {
 			log.Println("Unable to get cards fixme. Skipping")
 			continue
@@ -163,8 +171,13 @@ func main() {
 			log.Println("Unable to find origin zettel. Skipping")
 			continue
 		}
+		log.Printf("Found it in zettel %s.\n", originZettel)
 
-		InsertFixme(originZettel, cardIDstring, fixmeString)
+		err = InsertFixme(originZettel, cardIDstring, fixmeString)
+		if err != nil {
+			log.Println("Error during fixing: ")
+			log.Print(err)
+		}
 	}
 
 	zettels, err := api.Xk("ls", map[string]string{})
@@ -211,7 +224,6 @@ func main() {
 
 	// Process each zettel
 	for _, z := range zettels {
-		// fmt.Println(z)
 		processZettel(z)
 	}
 }

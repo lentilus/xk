@@ -1,0 +1,11 @@
+#!/bin/bash
+
+date="$(date +%Y-%m-%d)"
+title="__journal_${date}"
+zettel="$(xk path -z "$title" 2>/dev/null)"
+
+if [[ -z $zettel ]]; then
+    xk insert -z "$title"
+else
+    echo "$title"
+fi

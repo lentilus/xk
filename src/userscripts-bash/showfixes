@@ -1,0 +1,28 @@
+#!/bin/bash
+
+usage() {
+    echo "missing zettel (-z <zettel>) "
+    exit 1
+}
+
+# Parse command-line arguments
+while getopts ":z:" opt; do
+    case $opt in
+        z)
+            zettel="$OPTARG"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+if [ -z "$zettel" ]; then
+    usage
+fi
+
+path="$(xk path -z "$zettel")"
+find "$path" -name "fix_*" -print | while read file; do
+echo "=== $(basename "$file") ==="
+    cat "$file"
+done

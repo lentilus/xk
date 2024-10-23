@@ -6,12 +6,15 @@
   };
 
   outputs = { self, nixpkgs }: {
+    overlay = (final: prev: {
+        xk = self.packages.x86_64-linux.default;
+      });
     packages.x86_64-linux = let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in {
       default = pkgs.buildGoModule {
         pname = "xettelkasten";
-        version = "1.0.0";
+        version = "1.1.0";
 
         src = ./.;
         modRoot = ./.;

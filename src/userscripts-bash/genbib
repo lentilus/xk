@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Exit immediately if a command fails, if a variable is unset, or if any part of a pipeline fails
+set -euo pipefail
+
+# Check if required variables are set
+: "${BIB_PREAMBLE:?BIB_PREAMBLE is not set}"
+: "${BIB_ENTRY:?BIB_ENTRY is not set}"
+: "${BIB_FILENAME:?BIB_FILENAME is not set}"
+: "${ZETTEL_DATA:?ZETTEL_DATA is not set}"
+: "${AUTHOR:?AUTHOR is not set}"
+
+# Define the output file and a temporary file
+OUTPUT_FILE="$ZETTEL_DATA/$BIB_FILENAME"
+TEMP_FILE=$(mktemp)
+
+# Ensure temporary file is deleted on script exit (even in case of an error or interruption)
+trap 'rm -f "$TEMP_FILE"' EXIT
+
+# Write preamble to the temporary file
+echo "$BIB_PREAMBLE" | envsubst > "$TEMP_FILE"
+
+# Append entries for all zettels
+xk ls | while IFS= read -r ZETTEL; do
+    export ZETTEL  # Make ZETTEL an environment variable
+    export ESCAPED_ZETTEL=${ZETTEL//_/ }
+    echo "$BIB_ENTRY" | envsubst >> "$TEMP_FILE"
+done
+
+# Move the temp file to the target location on success
+mv "$TEMP_FILE" "$OUTPUT_FILE"
+
+# Disable the trap since the temp file has been successfully moved
+trap - EXIT
